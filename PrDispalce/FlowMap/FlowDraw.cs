@@ -31,7 +31,7 @@ namespace PrDispalce.FlowMap
         AxMapControl pMapControl;//绘制控件
         Dictionary<Tuple<int, int>, List<double>> Grids = new Dictionary<Tuple<int, int>, List<double>>();//控件格网划分
         List<IPoint> AllPoints = new List<IPoint>();//ODPoints
-        PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+        PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
         Dictionary<IPoint, Tuple<int, int>> NodeInGrid=new Dictionary<IPoint,Tuple<int,int>>() ;//获取点对应的格网
         string OutPath;
         Dictionary<Tuple<int, int>, IPoint> GridWithNode=new Dictionary<Tuple<int,int>,IPoint>();//获取格网中的点（每个格网最多对应一个点）
@@ -355,7 +355,7 @@ namespace PrDispalce.FlowMap
         /// ///BeType =0 考虑直线绘制；=1不考虑直线绘制
         public void SmoothFlowMap(List<Path> SubPaths, double MaxWidth, double MaxVolume, double MinVolume, int Type,int ODType, int OutType,int BeType,int InsertPoint)
         {
-            BuildingSim.PublicUtil PU = new BuildingSim.PublicUtil();
+            PrDispalce.FlowMap.PublicUtil PU = new PublicUtil();
             SMap OutMap = new SMap();
             SMap OutEdgeMap = new SMap();
 

@@ -13,7 +13,7 @@ using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.DataSourcesGDB;
 using ESRI.ArcGIS.DataSourcesFile;
 
-namespace PrDispalce.工具类
+namespace PrDispalce.FlowMap
 {
     class FeatureHandle
     {
@@ -310,7 +310,7 @@ namespace PrDispalce.工具类
 
             IFeatureClass oFeatureClass = null;
             IFeatureLayer oFeatureLayer = null;
-           
+
             IFields pFields = new FieldsClass();
             IFieldsEdit pFieldsEdit = (IFieldsEdit)pFields;
 
@@ -330,7 +330,7 @@ namespace PrDispalce.工具类
             oFeatureLayer = new FeatureLayerClass();
             //oFeatureLayer.Name = AliaseName;
             oFeatureLayer.FeatureClass = oFeatureClass;
-           
+
             return oFeatureLayer;
         }
         #endregion
@@ -345,7 +345,7 @@ namespace PrDispalce.工具类
 
             IFeatureClass oFeatureClass = null;
             IFeatureLayer oFeatureLayer = null;
-           
+
             IFields pFields = new FieldsClass();
             IFieldsEdit pFieldsEdit = (IFieldsEdit)pFields;
 
@@ -365,7 +365,7 @@ namespace PrDispalce.工具类
             oFeatureLayer = new FeatureLayerClass();
             //oFeatureLayer.Name = AliaseName;
             oFeatureLayer.FeatureClass = oFeatureClass;
-           
+
             return oFeatureLayer;
         }
         #endregion
@@ -380,7 +380,7 @@ namespace PrDispalce.工具类
 
             IFeatureClass oFeatureClass = null;
             IFeatureLayer oFeatureLayer = null;
-          
+
             IFields pFields = new FieldsClass();
             IFieldsEdit pFieldsEdit = (IFieldsEdit)pFields;
 
@@ -400,7 +400,7 @@ namespace PrDispalce.工具类
             oFeatureLayer = new FeatureLayerClass();
             //oFeatureLayer.Name = AliaseName;
             oFeatureLayer.FeatureClass = oFeatureClass;
-         
+
             return oFeatureLayer;
         }
         #endregion

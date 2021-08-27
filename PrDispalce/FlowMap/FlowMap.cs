@@ -39,12 +39,12 @@ namespace PrDispalce.FlowMap
         #region 参数
         AxMapControl pMapControl;
         IMap pMap;
-        PrDispalce.工具类.FeatureHandle pFeatureHandle = new 工具类.FeatureHandle();
+        PrDispalce.FlowMap.FeatureHandle pFeatureHandle = new FeatureHandle();
         FlowSup Fs = new FlowSup();
         string OutlocalFilePath, OutfileNameExt, OutFilePath;
-        PrDispalce.BuildingSim.PublicUtil Pu = new BuildingSim.PublicUtil();
+        PrDispalce.FlowMap.PublicUtil Pu = new PublicUtil();
         FlowMapUtil FMU = new FlowMapUtil();
-        PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试 
+        PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
         #endregion
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace PrDispalce.FlowMap
             IEnvelope Extend = pGeoDataset.Extent;
 
             #region 可视化显示
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
             object PolygonSb = Sb.PolygonSymbolization(1, 100, 100, 100, 0, 100, 100, 100);
             pMapControl.DrawShape(Extend, ref PolygonSb);
             pMapControl.Refresh();
@@ -341,7 +341,7 @@ namespace PrDispalce.FlowMap
             #endregion
 
             #region 可视化显示
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
             object PolylineSb = Sb.LineSymbolization(1, 100, 100, 100, 0);
             #endregion
 
@@ -446,7 +446,7 @@ namespace PrDispalce.FlowMap
             #endregion
 
             #region 可视化显示
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
             object PolylineSb = Sb.LineSymbolization(1, 100, 100, 100, 0);
             #endregion
 
@@ -651,7 +651,7 @@ namespace PrDispalce.FlowMap
             #endregion
 
             #region 可视化显示
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
             object PolygonSb = Sb.PolygonSymbolization(1, 100, 100, 100, 0, 100, 100, 100);
 
             for (int i = 0; i < cFM.PathGrids.Count; i++)
@@ -799,7 +799,7 @@ namespace PrDispalce.FlowMap
             //    pMapControl.DrawShape(CacheEnve, ref PolygonSb);
             //}
 
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();
             object PolylineSb = Sb.LineSymbolization(1, 100, 100, 100, 0);
 
             foreach (KeyValuePair<int, Path> kv in cFM.OrderPaths)
@@ -938,7 +938,7 @@ namespace PrDispalce.FlowMap
             #endregion
 
             #region 可视化显示
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();
             object PolygonSb = Sb.PolygonSymbolization(1, 100, 100, 100, 0, 100, 100, 100);
 
             for (int i = 0; i < cFM.PathGrids.Count; i++)
@@ -1034,7 +1034,7 @@ namespace PrDispalce.FlowMap
             #endregion
 
             #region 可视化显示
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();
             object PolylineSb = Sb.LineSymbolization(1, 100, 100, 100, 0);
             #endregion
 
@@ -1140,7 +1140,7 @@ namespace PrDispalce.FlowMap
             #endregion
 
             #region 可视化显示
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
             object PolylineSb = Sb.LineSymbolization(1, 100, 100, 100, 0);
             #endregion
 
@@ -1314,7 +1314,7 @@ namespace PrDispalce.FlowMap
             //    pMapControl.DrawShape(CacheEnve, ref PolygonSb);
             //}
 
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
             object PolylineSb = Sb.LineSymbolization(1, 100, 100, 100, 0);
 
             foreach (KeyValuePair<int, Path> kv in cFM.OrderPaths)
@@ -1499,7 +1499,7 @@ namespace PrDispalce.FlowMap
             //    pMapControl.DrawShape(CacheEnve, ref PolygonSb);
             //}
 
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
             object PolylineSb = Sb.LineSymbolization(1, 100, 100, 100, 0);
             #region 按宽度绘制路径           
             foreach (Path Pa in cFM.SubPaths)
@@ -1558,7 +1558,7 @@ namespace PrDispalce.FlowMap
         {
             IFeatureLayer pFeatureLayer = pFeatureHandle.GetLayer(pMap, this.comboBox1.Text);
             IFeatureClass pFeatureClass = pFeatureLayer.FeatureClass;
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();
 
             #region 参数
             IPoint OriginPoint = new PointClass();
@@ -1893,7 +1893,7 @@ namespace PrDispalce.FlowMap
         {
             IFeatureLayer pFeatureLayer = pFeatureHandle.GetLayer(pMap, this.comboBox1.Text);
             IFeatureClass pFeatureClass = pFeatureLayer.FeatureClass;
-            PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();//可视化测试
+            PrDispalce.FlowMap.Symbolization Sb = new Symbolization();//可视化测试
 
             #region 参数
             IPoint OriginPoint = new PointClass();

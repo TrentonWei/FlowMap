@@ -14,286 +14,14 @@ using ESRI.ArcGIS.DataSourcesGDB;
 using ESRI.ArcGIS.DataSourcesFile;
 using ESRI.ArcGIS.ADF;
 using ESRI.ArcGIS.SystemUI;
-using PrDispalce.PatternRecognition;
 
 using AuxStructureLib;
 using AuxStructureLib.IO;
-using PrDispalce.建筑物聚合;
 
-namespace PrDispalce.BuildingSim
+namespace PrDispalce.FlowMap
 {
     class PublicUtil
     {
-
-        /// <summary>
-        /// 获得图形上的所有结构（建筑物简化投稿用）
-        /// (凸角2、凹角3、阶梯状结构4//要求两个角都是直角
-        /// </summary>
-        /// <param name="Curpo"></param>
-        /// <param name="PerAngel"></param>
-        /// <returns></returns>
-        public List<BasicStruct> GetStructedNodes(PolygonObject Curpo, double PerAngle)
-        {
-            List<BasicStruct> StructedList = new List<BasicStruct>();
-
-            double Pi = 3.1415926;//Pi的定义
-            Curpo.GetBendAngle();//获得每一个节点的角度，区分正负号
-
-            int p = -1;//结构编码序号
-
-            #region 获得建筑物中的每一条边
-            List<PolylineObject> EdgeList = new List<PolylineObject>();
-            for (int i = 0; i < Curpo.PointList.Count; i++)
-            {
-                if (i != Curpo.PointList.Count - 1)
-                {
-                    PolylineObject CacheEdge = new PolylineObject();
-                    List<TriNode> NodeList = new List<TriNode>();
-                    NodeList.Add(Curpo.PointList[i]); NodeList.Add(Curpo.PointList[i + 1]);
-                    CacheEdge.PointList = NodeList; CacheEdge.ID = i;
-                    EdgeList.Add(CacheEdge);
-                }
-
-                else
-                {
-                    PolylineObject CacheEdge = new PolylineObject();
-                    List<TriNode> NodeList = new List<TriNode>();
-                    NodeList.Add(Curpo.PointList[i]); NodeList.Add(Curpo.PointList[0]);
-                    CacheEdge.PointList = NodeList; CacheEdge.ID = i;
-                    EdgeList.Add(CacheEdge);
-                }
-            }
-            #endregion
-
-            #region 其次，判断特殊结构（依次判断邻近两个转折）
-            for (int i = 0; i < Curpo.BendAngle.Count; i++)
-            {
-                if (i == Curpo.BendAngle.Count - 1)
-                {
-                    double BendAngle1 = Curpo.BendAngle[i][1]; //获得两个bend的角度
-                    double BendAngle2 = Curpo.BendAngle[0][1];
-
-                    #region 两个角均为直角
-                    if (Math.Abs(Math.Abs(BendAngle1) - Pi / 2) < PerAngle && Math.Abs(Math.Abs(BendAngle2) - Pi / 2) < PerAngle)
-                    {
-                        List<TriNode> NodeList = new List<TriNode>();
-                        List<PolylineObject> CacheEdgeList = new List<PolylineObject>();
-                        List<double> NodeAngle = new List<double>();
-
-                        NodeList.Add(Curpo.PointList[Curpo.PointList.Count - 2]);
-                        NodeList.Add(Curpo.PointList[Curpo.PointList.Count - 1]);
-                        NodeList.Add(Curpo.PointList[0]);
-                        NodeList.Add(Curpo.PointList[1]);
-
-                        NodeAngle.Add(Curpo.BendAngle[Curpo.BendAngle.Count - 2][1]);
-                        NodeAngle.Add(Curpo.BendAngle[Curpo.BendAngle.Count - 1][1]);
-                        NodeAngle.Add(Curpo.BendAngle[0][1]);
-                        NodeAngle.Add(Curpo.BendAngle[1][1]);
-
-                        CacheEdgeList.Add(EdgeList[EdgeList.Count - 2]);
-                        CacheEdgeList.Add(EdgeList[EdgeList.Count - 1]);
-                        CacheEdgeList.Add(EdgeList[0]);
-
-                        #region 是凸部或者凹部
-                        if (NodeAngle[1] * NodeAngle[2] > 0)
-                        {
-                            //凸部
-                            if (NodeAngle[1] > 0)
-                            {
-                                p++;
-                                BasicStruct CacheStruct = new BasicStruct(p, 2, NodeList, CacheEdgeList, NodeAngle);
-                                StructedList.Add(CacheStruct);
-                            }
-
-                            //凹部
-                            else if (NodeAngle[1] <= 0)
-                            {
-                                p++;
-                                BasicStruct CacheStruct = new BasicStruct(p, 3, NodeList, CacheEdgeList, NodeAngle);
-                                StructedList.Add(CacheStruct);
-                            }
-                        }
-                        #endregion
-
-                        #region 阶梯状
-                        else
-                        {
-                            p++;
-                            BasicStruct CacheStruct = new BasicStruct(p, 4, NodeList, CacheEdgeList, NodeAngle);
-                            StructedList.Add(CacheStruct);
-                        }
-                        #endregion
-                    }
-                    #endregion
-                }
-
-                else
-                {
-                    double BendAngle1 = Curpo.BendAngle[i][1]; //获得两个bend的角度
-                    double BendAngle2 = Curpo.BendAngle[i + 1][1];
-
-                    #region 两个角均为直角
-                    if (Math.Abs(Math.Abs(BendAngle1) - Pi / 2) < PerAngle && Math.Abs(Math.Abs(BendAngle2) - Pi / 2) < PerAngle)
-                    {
-                        List<TriNode> NodeList = new List<TriNode>();
-                        List<PolylineObject> CacheEdgeList = new List<PolylineObject>();
-                        List<double> NodeAngle = new List<double>();
-
-                        #region 如果是第一个点
-                        if (i == 0)
-                        {
-                            NodeList.Add(Curpo.PointList[Curpo.PointList.Count - 1]);
-                            NodeList.Add(Curpo.PointList[0]);
-                            NodeList.Add(Curpo.PointList[1]);
-                            NodeList.Add(Curpo.PointList[2]);
-
-                            NodeAngle.Add(Curpo.BendAngle[Curpo.BendAngle.Count - 1][1]);
-                            NodeAngle.Add(Curpo.BendAngle[0][1]);
-                            NodeAngle.Add(Curpo.BendAngle[1][1]);
-                            NodeAngle.Add(Curpo.BendAngle[2][1]);
-
-                            CacheEdgeList.Add(EdgeList[EdgeList.Count - 1]);
-                            CacheEdgeList.Add(EdgeList[0]);
-                            CacheEdgeList.Add(EdgeList[1]);
-                        }
-                        #endregion
-
-                        #region 如果是倒数第二个点
-                        else if (i == Curpo.PointList.Count - 2)
-                        {
-                            NodeList.Add(Curpo.PointList[i - 1]);
-                            NodeList.Add(Curpo.PointList[i]);
-                            NodeList.Add(Curpo.PointList[i + 1]);
-                            NodeList.Add(Curpo.PointList[0]);
-
-                            NodeAngle.Add(Curpo.BendAngle[i - 1][1]);
-                            NodeAngle.Add(Curpo.BendAngle[i][1]);
-                            NodeAngle.Add(Curpo.BendAngle[i + 1][1]);
-                            NodeAngle.Add(Curpo.BendAngle[0][1]);
-
-                            CacheEdgeList.Add(EdgeList[i - 1]);
-                            CacheEdgeList.Add(EdgeList[i]);
-                            CacheEdgeList.Add(EdgeList[i + 1]);
-                        }
-                        #endregion
-
-                        #region 其它
-                        else
-                        {
-                            NodeList.Add(Curpo.PointList[i - 1]);
-                            NodeList.Add(Curpo.PointList[i]);
-                            NodeList.Add(Curpo.PointList[i + 1]);
-                            NodeList.Add(Curpo.PointList[i + 2]);
-
-                            NodeAngle.Add(Curpo.BendAngle[i - 1][1]);
-                            NodeAngle.Add(Curpo.BendAngle[i][1]);
-                            NodeAngle.Add(Curpo.BendAngle[i + 1][1]);
-                            NodeAngle.Add(Curpo.BendAngle[i + 2][1]);
-
-                            CacheEdgeList.Add(EdgeList[i - 1]);
-                            CacheEdgeList.Add(EdgeList[i]);
-                            CacheEdgeList.Add(EdgeList[i + 1]);
-
-                        }
-                        #endregion
-
-                        #region 是凸部或者凹部
-                        if (NodeAngle[1] * NodeAngle[2] > 0)
-                        {
-                            //凸部
-                            if (NodeAngle[1] > 0)
-                            {
-                                p++;
-                                BasicStruct CacheStruct = new BasicStruct(p, 2, NodeList, CacheEdgeList, NodeAngle);
-                                StructedList.Add(CacheStruct);
-                            }
-
-                            //凹部
-                            else if (NodeAngle[1] <= 0)
-                            {
-                                p++;
-                                BasicStruct CacheStruct = new BasicStruct(p, 3, NodeList, CacheEdgeList, NodeAngle);
-                                StructedList.Add(CacheStruct);
-                            }
-                        }
-                        #endregion
-
-                        #region 阶梯状
-                        else
-                        {
-                            p++;
-                            BasicStruct CacheStruct = new BasicStruct(p, 4, NodeList, CacheEdgeList, NodeAngle);
-                            StructedList.Add(CacheStruct);
-                        }
-                        #endregion
-                    }
-                    #endregion
-                }
-            }
-            #endregion
-
-            return StructedList;
-        }
-
-        /// <summary>
-        /// 获取建筑物的凹点，同时，对节点的信息进行标记（已经有效考虑了洞的情况）
-        /// 【即外轮廓大于180度，则为凹点；内轮廓小于180度，则为凹点——洞的节点编码顺序与外轮廓相反】
-        /// </summary>
-        /// <param name="Po"></param>
-        /// <returns></returns>
-        public List<TriNode> GetConcaveNode(PolygonObject Po, double OnlineT)
-        {
-            List<TriNode> ConvexNodeList = new List<TriNode>();
-
-            for (int i = 0; i < Po.PointList.Count; i++)
-            {
-                #region 获取节点信息
-                TriNode CurPoint1 = null; TriNode AfterPoint2 = null; TriNode BeforePoint3 = null;
-
-                if (i == 0)
-                {
-                    CurPoint1 = Po.PointList[i];
-                    AfterPoint2 = Po.PointList[i + 1];
-                    BeforePoint3 = Po.PointList[Po.PointList.Count - 1];
-                }
-
-                else if (i == Po.PointList.Count - 1)
-                {
-                    CurPoint1 = Po.PointList[i];
-                    AfterPoint2 = Po.PointList[0];
-                    BeforePoint3 = Po.PointList[i - 1];
-                }
-
-                else
-                {
-                    CurPoint1 = Po.PointList[i];
-                    AfterPoint2 = Po.PointList[i + 1];
-                    BeforePoint3 = Po.PointList[i - 1];
-                }
-                #endregion
-
-                double Angle = this.GetPointAngle(CurPoint1, BeforePoint3, AfterPoint2);//计算角度
-
-                #region 判断凹凸性
-                #region 角度计算
-                Angle = Angle * 180 / 3.1415926;
-
-                if (Angle < 0)
-                {
-                    Angle = 360 + Angle;
-                }
-                #endregion
-
-                if (Angle > (180 + OnlineT))
-                {
-                    ConvexNodeList.Add(Po.PointList[i]);
-                }
-                #endregion
-            }
-
-            return ConvexNodeList;
-        }
-
         /// <summary>
         /// 计算建筑物图形上某节点处的角度
         /// </summary>
@@ -377,7 +105,7 @@ namespace PrDispalce.BuildingSim
 
             else if (CurPoint.X == EndPoint.X)
             {
-                double X = CurPoint.X ;
+                double X = CurPoint.X;
                 double Y = CurPoint.Y + 1000;
                 EndNode.X = X; EndNode.Y = Y;
             }
@@ -561,7 +289,7 @@ namespace PrDispalce.BuildingSim
 
             IArea pArea = pPolygon as IArea;
             IPoint CenterPoint = pArea.Centroid;
-            double pA=pArea.Area;
+            double pA = pArea.Area;
 
             double EnlargeRate = pA / tA;
 

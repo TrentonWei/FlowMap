@@ -11,7 +11,8 @@ using ESRI.ArcGIS.Controls;
 using ESRI.ArcGIS.DataSourcesGDB;
 using ESRI.ArcGIS.Geodatabase;
 
-namespace PrDispalce.工具类
+
+namespace PrDispalce.FlowMap
 {
     class Symbolization
     {
@@ -84,5 +85,6 @@ namespace PrDispalce.工具类
             return oMarkerSymbol;
         }
         #endregion
+
     }
 }

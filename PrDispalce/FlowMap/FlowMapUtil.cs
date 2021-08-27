@@ -28,7 +28,7 @@ namespace PrDispalce.FlowMap
     /// </summary>
     class FlowMapUtil
     {
-        PrDispalce.BuildingSim.PublicUtil Pu = new BuildingSim.PublicUtil();
+        PrDispalce.FlowMap.PublicUtil Pu = new PublicUtil();
         FlowSup Fs = new FlowSup();
 
         /// <summary>
