@@ -107,6 +107,12 @@
     <Compile Include="Agent\地图要素\PointObject.cs" />
     <Compile Include="Agent\地图要素\PolygonObject.cs" />
     <Compile Include="Agent\地图要素\PolylineObject.cs" />
+    <Compile Include="CGFlowMap\CGFlowMap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CGFlowMap\CGFlowMap.Designer.cs">
+      <DependentUpon>CGFlowMap.cs</DependentUpon>
+    </Compile>
     <Compile Include="FlowMap\BezierCurve.cs" />
     <Compile Include="FlowMap\cFlowMap.cs" />
     <Compile Include="FlowMap\FeatureHandle.cs" />

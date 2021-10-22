@@ -36,10 +36,8 @@
             this.button1 = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.button2 = new System.Windows.Forms.Button();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
@@ -127,16 +125,6 @@
             this.checkBox2.Text = "指数衰减";
             this.checkBox2.UseVisualStyleBackColor = true;
             // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(87, 234);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(251, 37);
-            this.button2.TabIndex = 7;
-            this.button2.Text = "节点高程获取（非内插）";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
             // comboBox3
             // 
             this.comboBox3.FormattingEnabled = true;
@@ -153,16 +141,6 @@
             this.label3.Size = new System.Drawing.Size(71, 18);
             this.label3.TabIndex = 9;
             this.label3.Text = "DEM图层";
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(87, 193);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(251, 35);
-            this.button3.TabIndex = 10;
-            this.button3.Text = "栅格值修改测试";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
             // 
@@ -186,7 +164,7 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(420, 196);
+            this.button6.Location = new System.Drawing.Point(420, 162);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(291, 32);
             this.button6.TabIndex = 13;
@@ -196,11 +174,11 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(420, 234);
+            this.button7.Location = new System.Drawing.Point(420, 208);
             this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(291, 27);
+            this.button7.Size = new System.Drawing.Size(291, 35);
             this.button7.TabIndex = 14;
-            this.button7.Text = "FlowMap（权重辅助2+最长距离）";
+            this.button7.Text = "FlowMap（权重赋值2+最长距离）";
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
@@ -245,9 +223,9 @@
             // 
             // button12
             // 
-            this.button12.Location = new System.Drawing.Point(420, 267);
+            this.button12.Location = new System.Drawing.Point(420, 249);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(338, 28);
+            this.button12.Size = new System.Drawing.Size(338, 37);
             this.button12.TabIndex = 19;
             this.button12.Text = "FlowMap(权重赋值+最长距离+方向限制)";
             this.button12.UseVisualStyleBackColor = true;
@@ -255,9 +233,9 @@
             // 
             // button13
             // 
-            this.button13.Location = new System.Drawing.Point(420, 301);
+            this.button13.Location = new System.Drawing.Point(420, 292);
             this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(432, 29);
+            this.button13.Size = new System.Drawing.Size(516, 32);
             this.button13.TabIndex = 20;
             this.button13.Text = "FlowMap(权重赋值+最长距离+方向限制+起点优先+按宽度绘制)";
             this.button13.UseVisualStyleBackColor = true;
@@ -265,9 +243,9 @@
             // 
             // button14
             // 
-            this.button14.Location = new System.Drawing.Point(420, 336);
+            this.button14.Location = new System.Drawing.Point(420, 330);
             this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(705, 30);
+            this.button14.Size = new System.Drawing.Size(705, 31);
             this.button14.TabIndex = 21;
             this.button14.Text = "FlowMap（权重赋值+最长距离+方向限制+起点优先+角度限制+避免重叠+按宽度绘制）";
             this.button14.UseVisualStyleBackColor = true;
@@ -295,7 +273,7 @@
             // 
             // button17
             // 
-            this.button17.Location = new System.Drawing.Point(420, 449);
+            this.button17.Location = new System.Drawing.Point(614, 411);
             this.button17.Name = "button17";
             this.button17.Size = new System.Drawing.Size(186, 31);
             this.button17.TabIndex = 24;
@@ -305,7 +283,7 @@
             // 
             // button18
             // 
-            this.button18.Location = new System.Drawing.Point(87, 277);
+            this.button18.Location = new System.Drawing.Point(87, 208);
             this.button18.Name = "button18";
             this.button18.Size = new System.Drawing.Size(251, 35);
             this.button18.TabIndex = 25;
@@ -315,7 +293,7 @@
             // 
             // button19
             // 
-            this.button19.Location = new System.Drawing.Point(87, 318);
+            this.button19.Location = new System.Drawing.Point(87, 249);
             this.button19.Name = "button19";
             this.button19.Size = new System.Drawing.Size(251, 37);
             this.button19.TabIndex = 26;
@@ -325,7 +303,7 @@
             // 
             // button20
             // 
-            this.button20.Location = new System.Drawing.Point(87, 361);
+            this.button20.Location = new System.Drawing.Point(87, 292);
             this.button20.Name = "button20";
             this.button20.Size = new System.Drawing.Size(251, 32);
             this.button20.TabIndex = 27;
@@ -335,7 +313,7 @@
             // 
             // button21
             // 
-            this.button21.Location = new System.Drawing.Point(650, 449);
+            this.button21.Location = new System.Drawing.Point(806, 411);
             this.button21.Name = "button21";
             this.button21.Size = new System.Drawing.Size(150, 31);
             this.button21.TabIndex = 28;
@@ -345,7 +323,7 @@
             // 
             // button22
             // 
-            this.button22.Location = new System.Drawing.Point(87, 400);
+            this.button22.Location = new System.Drawing.Point(87, 330);
             this.button22.Name = "button22";
             this.button22.Size = new System.Drawing.Size(251, 31);
             this.button22.TabIndex = 29;
@@ -355,7 +333,7 @@
             // 
             // button23
             // 
-            this.button23.Location = new System.Drawing.Point(87, 437);
+            this.button23.Location = new System.Drawing.Point(87, 411);
             this.button23.Name = "button23";
             this.button23.Size = new System.Drawing.Size(251, 30);
             this.button23.TabIndex = 30;
@@ -365,7 +343,7 @@
             // 
             // button24
             // 
-            this.button24.Location = new System.Drawing.Point(87, 474);
+            this.button24.Location = new System.Drawing.Point(87, 367);
             this.button24.Name = "button24";
             this.button24.Size = new System.Drawing.Size(251, 38);
             this.button24.TabIndex = 31;
@@ -377,7 +355,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1134, 524);
+            this.ClientSize = new System.Drawing.Size(1134, 454);
             this.Controls.Add(this.button24);
             this.Controls.Add(this.button23);
             this.Controls.Add(this.button22);
@@ -399,10 +377,8 @@
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.comboBox3);
-            this.Controls.Add(this.button2);
             this.Controls.Add(this.checkBox2);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.button1);
@@ -427,10 +403,8 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.CheckBox checkBox2;
-        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.ComboBox comboBox3;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button6;
