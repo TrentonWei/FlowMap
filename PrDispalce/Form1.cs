@@ -101,10 +101,26 @@ namespace PrDispalce
             FM.Show();
         }
 
+        /// <summary>
+        /// FlowFrm
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void flowMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
             PrDispalce.FlowMap.FlowMap FM = new FlowMap.FlowMap(this.axMapControl1);
             FM.Show();
+        }
+
+        /// <summary>
+        /// CGFlowFrm
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cGFlowMapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PrDispalce.CGFlowMap.CGFlowMap CGFM = new CGFlowMap.CGFlowMap(this.axMapControl1);
+            CGFM.Show();
         }
     }
 }

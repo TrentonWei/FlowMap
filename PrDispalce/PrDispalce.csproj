@@ -139,6 +139,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="CGFlowMap\CGFlowMap.resx">
+      <DependentUpon>CGFlowMap.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FlowMap\FlowMap.resx">
       <DependentUpon>FlowMap.cs</DependentUpon>
     </EmbeddedResource>

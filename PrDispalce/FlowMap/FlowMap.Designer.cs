@@ -138,9 +138,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(11, 48);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(71, 18);
+            this.label3.Size = new System.Drawing.Size(80, 18);
             this.label3.TabIndex = 9;
-            this.label3.Text = "DEM图层";
+            this.label3.Text = "阻隔图层";
             // 
             // button4
             // 
