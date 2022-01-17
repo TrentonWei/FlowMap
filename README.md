@@ -8,8 +8,8 @@ An automatic algorithm for generation of a one-to-many flow map, start coding~
 #The principle
 ![image](https://github.com/TrentonWei/FlowMap/blob/master/%E5%8E%9F%E7%90%86.png)
 
+#The result 
+![image](https://github.com/TrentonWei/FlowMap/blob/master/Result1.png)
+
 #The production process 
 ![image](https://github.com/TrentonWei/FlowMap/blob/master/Process.gif)
-
-#The result 
-![image](https://github.com/TrentonWei/FlowMap/blob/master/Result.tif)
