@@ -211,7 +211,7 @@ namespace PrDispalce.FlowMap
         {
             if (CachePath != null)
             {
-                object cPolylineSb = Sb.LineSymbolization(Width, 100, 100, 100, 0);
+                object cPolylineSb = Sb.LineSymbolization(Width, 51, 51, 51, 0);
 
                 List<TriNode> NodeList = new List<TriNode>();
                 for (int i = 0; i < CachePath.ePath.Count - 1; i++)
@@ -377,7 +377,7 @@ namespace PrDispalce.FlowMap
                 }
                 #endregion
 
-                object PolylineSb = Sb.LineSymbolization(CacheWidth, 100, 100, 100, 0);
+                object PolylineSb = Sb.LineSymbolization(CacheWidth, 255, 0, 0, 0);
 
                 #region 贝塞尔曲线绘制
                 List<IPoint> ControlPoints = new List<IPoint>();

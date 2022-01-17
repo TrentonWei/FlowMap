@@ -3095,7 +3095,44 @@ namespace PrDispalce.FlowMap
             Dictionary<Tuple<int, int>, List<double>> Grids = Fs.GetGrid(ExtendValue, GridXY, ref colNum, ref rowNum);//构建格网     
             Dictionary<IPoint, Tuple<int, int>> NodeInGrid = Fs.GetNodeInGrid(Grids, AllPoints);//获取点对应的格网
             Dictionary<Tuple<int, int>, IPoint> GridWithNode = Fs.GetGridContainNodes(Grids, AllPoints);//获取格网中的点（每个格网最多对应一个点）
+            #endregion
 
+            #region 网格绘制
+            object PolygonSymbol = Sb.PolygonSymbolization(0.4, 153, 153, 153, 0, 0, 20, 20);           
+            foreach (KeyValuePair<Tuple<int, int>, List<double>> Kv in Grids)
+            {
+                List<TriNode> NodeList = new List<TriNode>();
+
+                TriNode Node1 = new TriNode();
+                Node1.X = Kv.Value[0];
+                Node1.Y = Kv.Value[1];
+
+                TriNode Node2 = new TriNode();
+                Node2.X = Kv.Value[2];
+                Node2.Y = Kv.Value[1];
+
+                TriNode Node3 = new TriNode();
+                Node3.X = Kv.Value[2];
+                Node3.Y = Kv.Value[3];
+
+                TriNode Node4 = new TriNode();
+                Node4.X = Kv.Value[0];
+                Node4.Y = Kv.Value[3];
+
+                NodeList.Add(Node1); NodeList.Add(Node2); NodeList.Add(Node3); NodeList.Add(Node4);
+
+                TriNode MidNode = new TriNode();
+                MidNode.X = (Kv.Value[0] + Kv.Value[2]) / 2;
+                MidNode.Y = (Kv.Value[1] + Kv.Value[3]) / 2;
+                PointObject CachePoint = new PointObject(0,MidNode);
+
+                PolygonObject CachePo = new PolygonObject(0,NodeList);
+                IPolygon pPolygon = this.PolygonObjectConvert(CachePo);
+                pMapControl.DrawShape(pPolygon, ref PolygonSymbol);
+            }
+            #endregion         
+
+            #region
             Tuple<int, int> sGrid = NodeInGrid[OriginPoint];//起点格网编码
             List<Tuple<int, int>> desGrids = new List<Tuple<int, int>>();//终点格网编码
             for (int i = 0; i < DesPoints.Count; i++)
@@ -3354,6 +3391,47 @@ namespace PrDispalce.FlowMap
             FD2.FlowMapDraw(cFM.SubPaths, 15, 2000, 20, 1, 0, 1);
             #endregion
         }
+
+        /// <summary>
+        /// 将建筑物转化为IPolygon
+        /// </summary>
+        /// <param name="pPolygonObject"></param>
+        /// <returns></returns>
+        IPolygon PolygonObjectConvert(PolygonObject pPolygonObject)
+        {
+            Ring ring1 = new RingClass();
+            object missing = Type.Missing;
+
+            IPoint curResultPoint = new PointClass();
+            TriNode curPoint = null;
+            if (pPolygonObject != null)
+            {
+                for (int i = 0; i < pPolygonObject.PointList.Count; i++)
+                {
+                    curPoint = pPolygonObject.PointList[i];
+                    curResultPoint.PutCoords(curPoint.X, curPoint.Y);
+                    ring1.AddPoint(curResultPoint, ref missing, ref missing);
+                }
+            }
+
+            curPoint = pPolygonObject.PointList[0];
+            curResultPoint.PutCoords(curPoint.X, curPoint.Y);
+            ring1.AddPoint(curResultPoint, ref missing, ref missing);
+
+            IGeometryCollection pointPolygon = new PolygonClass();
+            pointPolygon.AddGeometry(ring1 as IGeometry, ref missing, ref missing);
+            IPolygon pPolygon = pointPolygon as IPolygon;
+
+            //PrDispalce.工具类.Symbolization Sb = new 工具类.Symbolization();
+            //object PolygonSymbol = Sb.PolygonSymbolization(1, 100, 100, 100, 0, 0, 20, 20);
+
+            //pMapControl.DrawShape(pPolygon, ref PolygonSymbol);
+            //pMapControl.Map.RecalcFullExtent();
+
+            pPolygon.SimplifyPreserveFromTo();
+            return pPolygon;
+        }
+
 
         /// <summary>
         /// 考虑阻隔优化

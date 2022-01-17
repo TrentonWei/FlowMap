@@ -108,7 +108,7 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(97, 116);
+            this.checkBox1.Location = new System.Drawing.Point(87, 191);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(106, 22);
             this.checkBox1.TabIndex = 5;
@@ -118,7 +118,7 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(97, 144);
+            this.checkBox2.Location = new System.Drawing.Point(87, 219);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(106, 22);
             this.checkBox2.TabIndex = 6;
@@ -283,7 +283,7 @@
             // 
             // button18
             // 
-            this.button18.Location = new System.Drawing.Point(87, 208);
+            this.button18.Location = new System.Drawing.Point(87, 247);
             this.button18.Name = "button18";
             this.button18.Size = new System.Drawing.Size(251, 35);
             this.button18.TabIndex = 25;
@@ -293,7 +293,7 @@
             // 
             // button19
             // 
-            this.button19.Location = new System.Drawing.Point(87, 249);
+            this.button19.Location = new System.Drawing.Point(87, 288);
             this.button19.Name = "button19";
             this.button19.Size = new System.Drawing.Size(251, 37);
             this.button19.TabIndex = 26;
@@ -303,7 +303,7 @@
             // 
             // button20
             // 
-            this.button20.Location = new System.Drawing.Point(87, 292);
+            this.button20.Location = new System.Drawing.Point(87, 331);
             this.button20.Name = "button20";
             this.button20.Size = new System.Drawing.Size(251, 32);
             this.button20.TabIndex = 27;
@@ -313,17 +313,17 @@
             // 
             // button21
             // 
-            this.button21.Location = new System.Drawing.Point(806, 411);
+            this.button21.Location = new System.Drawing.Point(97, 111);
             this.button21.Name = "button21";
-            this.button21.Size = new System.Drawing.Size(150, 31);
+            this.button21.Size = new System.Drawing.Size(299, 31);
             this.button21.TabIndex = 28;
-            this.button21.Text = "效率优化2";
+            this.button21.Text = "效率优化2(Button for Sample)";
             this.button21.UseVisualStyleBackColor = true;
             this.button21.Click += new System.EventHandler(this.button21_Click);
             // 
             // button22
             // 
-            this.button22.Location = new System.Drawing.Point(87, 330);
+            this.button22.Location = new System.Drawing.Point(87, 369);
             this.button22.Name = "button22";
             this.button22.Size = new System.Drawing.Size(251, 31);
             this.button22.TabIndex = 29;
@@ -333,7 +333,7 @@
             // 
             // button23
             // 
-            this.button23.Location = new System.Drawing.Point(87, 411);
+            this.button23.Location = new System.Drawing.Point(87, 450);
             this.button23.Name = "button23";
             this.button23.Size = new System.Drawing.Size(251, 30);
             this.button23.TabIndex = 30;
@@ -343,7 +343,7 @@
             // 
             // button24
             // 
-            this.button24.Location = new System.Drawing.Point(87, 367);
+            this.button24.Location = new System.Drawing.Point(87, 406);
             this.button24.Name = "button24";
             this.button24.Size = new System.Drawing.Size(251, 38);
             this.button24.TabIndex = 31;
@@ -355,7 +355,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1134, 454);
+            this.ClientSize = new System.Drawing.Size(408, 154);
             this.Controls.Add(this.button24);
             this.Controls.Add(this.button23);
             this.Controls.Add(this.button22);
