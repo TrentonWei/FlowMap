@@ -6,10 +6,10 @@ An automatic algorithm for generation of a one-to-many flow map, start coding~
 #The tools were implemented in C# on ArcGIS 10.2 software (ESRI, USA). And the tool has a separate form to set the input, output and parameters for the algorithms.
 
 #The principle
-![](https://github.com/TrentonWei/FlowMap/blob/master/%E5%8E%9F%E7%90%86.png)
+![image](https://github.com/TrentonWei/FlowMap/blob/master/%E5%8E%9F%E7%90%86.png)
 
 #The production process 
-![](https://github.com/TrentonWei/FlowMap/blob/master/Process.gif)
+![image](https://github.com/TrentonWei/FlowMap/blob/master/Process.gif)
 
 #The result 
-![](https://github.com/TrentonWei/FlowMap/blob/master/Result.tif)
+![image](https://github.com/TrentonWei/FlowMap/blob/master/Result.tif)
