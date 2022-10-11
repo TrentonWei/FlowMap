@@ -2332,7 +2332,7 @@ namespace AuxStructureLib
 
             #region 创建属性字段
             //属性字段1
-            IField pField1;
+            IField pField1;//记录宽度
             IFieldEdit pFieldEdit1;
             pField1 = new FieldClass();
             pFieldEdit1 = pField1 as IFieldEdit;
@@ -2341,7 +2341,7 @@ namespace AuxStructureLib
             pFieldEdit1.Type_2 = esriFieldType.esriFieldTypeDouble;
             pFieldsEdit.AddField(pField1);
 
-            IField pField2;
+            IField pField2;//记录流量
             IFieldEdit pFieldEdit2;
             pField2 = new FieldClass();
             pFieldEdit2 = pField2 as IFieldEdit;
@@ -2349,6 +2349,78 @@ namespace AuxStructureLib
             pFieldEdit2.Name_2 = "Volume";
             pFieldEdit2.Type_2 = esriFieldType.esriFieldTypeDouble;
             pFieldsEdit.AddField(pField2);
+
+            IField pField3;//记录向左还是向右偏移  偏移情况 =2不偏移；1向左偏移；3向右偏移(在此)
+            IFieldEdit pFieldEdit3;
+            pField3 = new FieldClass();
+            pFieldEdit3 = pField3 as IFieldEdit;
+            pFieldEdit3.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit3.Name_2 = "Shift";
+            pFieldEdit3.Type_2 = esriFieldType.esriFieldTypeInteger;
+            pFieldsEdit.AddField(pField3);
+
+            IField pField4;//表示是前一条边的左侧还是右侧（1左侧；3右侧）
+            IFieldEdit pFieldEdit4;
+            pField4 = new FieldClass();
+            pFieldEdit4 = pField4 as IFieldEdit;
+            pFieldEdit4.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit4.Name_2 = "LOrR";
+            pFieldEdit4.Type_2 = esriFieldType.esriFieldTypeInteger;
+            pFieldsEdit.AddField(pField4);
+
+            IField pField5;//记录流入的路径数目
+            IFieldEdit pFieldEdit5;
+            pField5 = new FieldClass();
+            pFieldEdit5 = pField5 as IFieldEdit;
+            pFieldEdit5.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit5.Name_2 = "FlowIn";
+            pFieldEdit5.Type_2 = esriFieldType.esriFieldTypeInteger;
+            pFieldsEdit.AddField(pField5);
+
+            IField pField6;//记录流出的路径数目
+            IFieldEdit pFieldEdit6;
+            pField6 = new FieldClass();
+            pFieldEdit6 = pField6 as IFieldEdit;
+            pFieldEdit6.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit6.Name_2 = "FlowOut";
+            pFieldEdit6.Type_2 = esriFieldType.esriFieldTypeInteger;
+            pFieldsEdit.AddField(pField6);
+
+            IField pField7;//记录该条边的长度
+            IFieldEdit pFieldEdit7;
+            pField7 = new FieldClass();
+            pFieldEdit7 = pField7 as IFieldEdit;
+            pFieldEdit7.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit7.Name_2 = "Length";
+            pFieldEdit7.Type_2 = esriFieldType.esriFieldTypeDouble;
+            pFieldsEdit.AddField(pField7);
+
+            IField pField8;//记录光滑系数 Sun 2013
+            IFieldEdit pFieldEdit8;
+            pField8 = new FieldClass();
+            pFieldEdit8 = pField8 as IFieldEdit;
+            pFieldEdit8.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit8.Name_2 = "Smooth";
+            pFieldEdit8.Type_2 = esriFieldType.esriFieldTypeDouble;
+            pFieldsEdit.AddField(pField8);
+
+            IField pField9;//记录当前目标流出的路径ID
+            IFieldEdit pFieldEdit9;
+            pField9 = new FieldClass();
+            pFieldEdit9 = pField9 as IFieldEdit;
+            pFieldEdit9.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit9.Name_2 = "FOID";
+            pFieldEdit9.Type_2 = esriFieldType.esriFieldTypeInteger;
+            pFieldsEdit.AddField(pField9);
+
+            IField pField10;//前置节点需偏移的距离
+            IFieldEdit pFieldEdit10;
+            pField10 = new FieldClass();
+            pFieldEdit10 = pField10 as IFieldEdit;
+            pFieldEdit10.Length_2 = 30;//Length_2与Length的区别是一个是只读的，一个是可写的，以下Name_2,Type_2也是一样
+            pFieldEdit10.Name_2 = "SDis";
+            pFieldEdit10.Type_2 = esriFieldType.esriFieldTypeDouble;
+            pFieldsEdit.AddField(pField10);
             #endregion
 
             #region 创建要素类
@@ -2414,8 +2486,16 @@ namespace AuxStructureLib
                         }
                     }
                     feature.Shape = shp;
-                    feature.set_Value(2, this.PolylineList[i].SylWidth);//编号 
-                    feature.set_Value(3, this.PolylineList[i].Volume);//编号 
+                    feature.set_Value(2, this.PolylineList[i].SylWidth);//宽度 
+                    feature.set_Value(3, this.PolylineList[i].Volume);//流量 
+                    feature.set_Value(4, this.PolylineList[i].shift);//偏移 
+                    feature.set_Value(5, this.PolylineList[i].LOrR);//左右侧 
+                    feature.set_Value(6, this.PolylineList[i].FlowIn);//流入路径的数目 
+                    feature.set_Value(7, this.PolylineList[i].FlowOut);//流出路径的数目
+                    feature.set_Value(8, this.PolylineList[i].Length);//长度（该条边的长度）
+                    feature.set_Value(9, this.PolylineList[i].SmoothValue);//光滑程度 Sun (2013)
+                    feature.set_Value(10, this.PolylineList[i].FlowOutId);//流出的路径编号
+                    feature.set_Value(11, this.PolylineList[i].ShiftDis);//节点偏移距离
 
                     feature.Store();//保存IFeature对象  
                     fr.WriteFeature(feature);//将IFeature对象，添加到当前图层上     

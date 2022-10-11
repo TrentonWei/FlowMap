@@ -707,13 +707,13 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
-        /// 获取给定Grid的k阶邻近（邻近要素包含了自身）
+        /// 获取给定Grid的k阶邻近（邻近要素包含了自身）未考虑重叠和节点疏密的约束
         /// </summary>
         /// <param name="TargetGrid">目标Grid</param>
         /// <param name="Grids">格网</param>
         /// <param name="NearT">k阶邻近</param>
         /// <returns></returns>
-        public List<Tuple<int, int>> GetNearGrids(Tuple<int, int> TargetGrid, List<Tuple<int, int>> Grids,int NearT)
+        public List<Tuple<int, int>> GetNearGrids( Tuple<int, int> TargetGrid, List<Tuple<int, int>> Grids,int NearT)
         {
             List<Tuple<int, int>> NearGrids = new List<Tuple<int, int>>();
 
@@ -732,6 +732,145 @@ namespace PrDispalce.FlowMap
             #endregion
 
             return NearGrids;
+        }
+
+        /// <summary>
+        /// 获取给定Grid的k阶邻近（邻近要素包含了自身）考虑重叠和节点间疏密的约束!!!
+        /// </summary>
+        /// desGrids=desPoint的格网</param>
+        /// <param name="TargetGrid">目标Grid</param>
+        /// <param name="Grids">格网</param>
+        /// <param name="NearT">k阶邻近</param>
+        /// <returns></returns>
+        public List<Tuple<int, int>> GetNearGrids_2(List<Tuple<int, int>> desGrids, Tuple<int, int> TargetGrid, List<Tuple<int, int>> Grids, int NearT)
+        {
+            List<Tuple<int, int>> NearGrids = new List<Tuple<int, int>>();
+            bool ReturnLabel = true;
+
+            #region 判断过程(n阶表示2*N的邻近)
+            NearT = NearT + 1;
+            do
+            {
+                NearT = NearT - 1; ReturnLabel = true;
+                for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+                {
+                    for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+                    {
+                        Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+                        if (Grids.Contains(CacheGrid))
+                        {
+                            NearGrids.Add(CacheGrid);
+                        }
+
+                        if (desGrids.Contains(CacheGrid) && i != TargetGrid.Item1 && j != TargetGrid.Item2)
+                        {
+                            ReturnLabel = false;
+                        }
+                    }
+                }
+            } while (!ReturnLabel && NearT > 0);
+            #endregion
+
+
+            return NearGrids;
+        }
+
+        /// <summary>
+        /// 获取给定Grid的k阶邻近（邻近要素包含了自身）考虑重叠和节点间疏密的约束!!!
+        /// 这里对K=0做特殊处理，因为Point处于格网中时，往往可能不一定处于格网的中间
+        /// </summary>
+        /// desGrids=desPoint的格网</param>
+        /// <param name="TargetGrid">目标Grid</param>
+        /// Dictionary<Tuple<int, int>, IPoint> GridWithNode 表示Grid对应的节点
+        /// <param name="Grids">格网</param>
+        /// <param name="NearT">k阶邻近</param>
+        /// <returns></returns>
+        public List<Tuple<int, int>> GetNearGrids_3(List<Tuple<int, int>> desGrids, Tuple<int, int> TargetGrid, Dictionary<Tuple<int, int>, IPoint> GridWithNode,List<Tuple<int, int>> Grids, Dictionary<Tuple<int, int>, List<double>> GridValue,int NearT)
+        {
+            List<Tuple<int, int>> NearGrids = new List<Tuple<int, int>>();
+            bool ReturnLabel = true;
+
+            if (NearT == 0)
+            {
+                NearT = NearT + 1;
+                IPoint sPoint = new PointClass();
+                sPoint.X = GridWithNode[TargetGrid].X;
+                sPoint.Y = GridWithNode[TargetGrid].Y; 
+
+                double XDis=Math.Abs(GridValue[TargetGrid][2]-GridValue[TargetGrid][0]);
+                double YDis=Math.Abs(GridValue[TargetGrid][3]-GridValue[TargetGrid][1]);
+                
+                for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+                {
+                    for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+                    {
+                        Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+                        double Dis = this.GetPointGridDis(sPoint, GridValue[CacheGrid]);
+
+                        if (Dis < 0.1 * XDis || Dis < 0.1 * YDis)
+                        {
+                            NearGrids.Add(CacheGrid);
+                        }
+                    }
+                }
+            }
+
+            else
+            {
+                #region 判断过程(n阶表示2*N的邻近)
+                NearT = NearT + 1;
+                do
+                {
+                    NearT = NearT - 1; ReturnLabel = true;
+                    for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+                    {
+                        for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+                        {
+                            Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+                            if (Grids.Contains(CacheGrid))
+                            {
+                                NearGrids.Add(CacheGrid);
+                            }
+
+                            if (desGrids.Contains(CacheGrid) && i != TargetGrid.Item1 && j != TargetGrid.Item2)
+                            {
+                                ReturnLabel = false;
+                            }
+                        }
+                    }
+                } while (!ReturnLabel && NearT > 0);
+                #endregion
+            }
+
+            return NearGrids;
+        }
+
+        /// <summary>
+        /// 获取给定点到Grid的最小距离
+        /// </summary>
+        /// <param name="sPoint">给定点</param>
+        /// <param name="Grid">格网 0,2 X；1,3 Y</param>
+        /// <returns></returns>
+        double GetPointGridDis(IPoint sPoint,List<double> Grid)
+        {
+            double Dis=0;
+            List<double> DisList = new List<double>();
+
+            if ((Grid[0] - sPoint.X) * (Grid[2] - sPoint.X) <= 0 && (Grid[1] - sPoint.Y) * (Grid[3] - sPoint.Y) <= 0)
+            {
+                Dis = 0;
+            }
+
+            else
+            {
+                double Dis1 = Math.Abs(Grid[0] - sPoint.X); DisList.Add(Dis1);
+                double Dis2 = Math.Abs(Grid[1] - sPoint.Y); DisList.Add(Dis2);
+                double Dis3 = Math.Abs(Grid[2] - sPoint.X); DisList.Add(Dis3);
+                double Dis4 = Math.Abs(Grid[3] - sPoint.Y); DisList.Add(Dis4);
+
+                Dis = DisList.Min();
+            }
+            return Dis;
         }
 
         /// <summary>

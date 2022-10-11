@@ -50,6 +50,91 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
+        /// 获得沿边左侧或右侧偏移指定距离的点
+        /// </summary>
+        /// <param name="sPoint">起点</param>
+        /// <param name="ePoint">终点</param>
+        /// TarPoint 指定需偏移的点
+        /// <param name="ShiftDis">偏移距离</param>
+        /// <param name="shift">偏移方向</param>=1向左偏移；=3向右偏移
+        /// <returns></returns>
+        public void GetShiftPoint(IPoint sPoint, IPoint ePoint, IPoint TarPoint, double ShiftDis, int shift)
+        {
+            double Dis = Math.Sqrt((ePoint.X - sPoint.X) * (ePoint.X - sPoint.X) + (ePoint.Y - sPoint.Y) * (ePoint.Y - sPoint.Y));
+            double cos = (ePoint.X - sPoint.X) / Dis; double sin = (ePoint.Y - sPoint.Y) / Dis;
+
+            #region 向左偏移
+            if (shift == 1)
+            {
+                TarPoint.X = TarPoint.X - sin * ShiftDis;
+                TarPoint.Y = TarPoint.Y + cos * ShiftDis;
+            }
+            #endregion
+
+            #region 向右偏移
+            if (shift == 3)
+            {
+                TarPoint.X = TarPoint.X + sin * ShiftDis;
+                TarPoint.Y = TarPoint.Y - cos * ShiftDis; ;
+            }
+            #endregion
+        }
+
+        /// <summary>
+        /// 获得线要素的点列表
+        /// </summary>
+        /// <param name="PL"></param>
+        /// <returns></returns>
+        public List<IPoint> GetPoints(PolylineObject PL)
+        {
+            List<IPoint> Points = new List<IPoint>();
+            foreach (TriNode Tn in PL.PointList)
+            {
+                IPoint pPoint = new PointClass();
+                pPoint.X = Tn.X;
+                pPoint.Y = Tn.Y;
+
+                Points.Add(pPoint);
+            }
+
+            return Points;
+        }
+
+        /// <summary>
+        /// 获得沿边左侧或右侧偏移指定距离的点
+        /// </summary>
+        /// <param name="sPoint">起点</param>
+        /// <param name="ePoint">终点</param>
+        /// TarPoint 指定需偏移的点
+        /// <param name="ShiftDis">偏移距离</param> 若>0，向左偏移；若<0，向右偏移
+        /// <returns></returns>
+        public void GetShiftPoint(IPoint sPoint, IPoint ePoint, IPoint TarPoint, double ShiftDis)
+        {
+            double Dis = Math.Sqrt((ePoint.X - sPoint.X) * (ePoint.X - sPoint.X) + (ePoint.Y - sPoint.Y) * (ePoint.Y - sPoint.Y));
+            double cos = (ePoint.X - sPoint.X) / Dis; double sin = (ePoint.Y - sPoint.Y) / Dis;
+
+            TarPoint.X = TarPoint.X - sin * ShiftDis;
+            TarPoint.Y = TarPoint.Y + cos * ShiftDis;
+        }
+
+        /// <summary>
+        /// 获得线段的定比分点
+        /// </summary>
+        /// sn:ne=rate 若n在se外，rate是负值
+        /// <param name="sPoint"></param>
+        /// <param name="ePoint"></param>
+        /// <param name="Rate"></param>
+        /// <returns></returns>nPoint
+        public IPoint GetExtendPoint(IPoint sPoint, IPoint ePoint, double Rate)
+        {
+            double x = (sPoint.X + Rate * ePoint.X) / (1 + Rate);
+            double y = (sPoint.Y + Rate * ePoint.Y) / (1 + Rate);
+            IPoint nPoint = new PointClass();
+            nPoint.X = x; nPoint.Y = y;
+            return nPoint;
+        }
+
+        /// <summary>
         /// 给定直线上两点，获取从给定点出发与该直线平行的平行线
         /// </summary>
         /// <param name="CurPoint"></param>
@@ -313,6 +398,66 @@ namespace PrDispalce.FlowMap
             Value = Convert.ToDouble(curFeature.get_Value(field1));
 
             return Value;
+        }
+
+        /// <summary>
+        /// 获取给定Feature的属性
+        /// </summary>
+        /// <param name="CurFeature"></param>
+        /// <param name="FieldString"></param>
+        /// <returns></returns>
+        public int GetintValue(IFeature curFeature, string FieldString)
+        {
+            int Value = 0;
+
+            IFields pFields = curFeature.Fields;
+            int field1 = pFields.FindField(FieldString);
+            Value = Convert.ToInt32(curFeature.get_Value(field1));
+
+            return Value;
+        }
+
+        /// <summary>
+        /// 获得给定的两点间的距离
+        /// </summary>
+        /// <param name="sPoint"></param>
+        /// <param name="ePoint"></param>
+        /// <returns></returns>
+        public double GetDis(IPoint sPoint, IPoint ePoint)
+        {
+            return Math.Sqrt((ePoint.Y - sPoint.Y) * (ePoint.Y - sPoint.Y) + (ePoint.X - sPoint.X) * (ePoint.X - sPoint.X));
+        }
+
+        /// <summary>
+        /// 获得给定的两点间的距离
+        /// </summary>
+        /// <param name="sPoint"></param>
+        /// <param name="ePoint"></param>
+        /// <returns></returns>
+        public double GetDis(TriNode sPoint, TriNode ePoint)
+        {
+            return Math.Sqrt((ePoint.Y - sPoint.Y) * (ePoint.Y - sPoint.Y) + (ePoint.X - sPoint.X) * (ePoint.X - sPoint.X));
+        }
+
+        /// <summary>
+        /// 计算给定线的光滑程度
+        /// </summary>
+        /// <returns></returns>
+        public double GetSmoothValue(PolylineObject PLine)
+        {
+            double Smooth = 0;double PI=3.1415926;
+            PublicUtil Pu=new PublicUtil();
+            double DisE = Pu.GetDis(PLine.PointList[0], PLine.PointList[PLine.PointList.Count - 1]);
+            double DisI = 0;
+
+            for (int i = 1; i < PLine.PointList.Count-1; i++)
+            {
+                double Angle = this.GetAngle(PLine.PointList[i], PLine.PointList[i + 1], PLine.PointList[i - 1]);
+                DisI = DisI + Pu.GetDis(PLine.PointList[i], PLine.PointList[i - 1]) * Math.Abs(Math.Sin(PI - Angle));
+            }
+
+            Smooth = 1 - DisI / DisE;
+            return Smooth;
         }
     }
 }

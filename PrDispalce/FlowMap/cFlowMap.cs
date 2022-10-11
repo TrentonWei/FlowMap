@@ -218,7 +218,7 @@ namespace PrDispalce.FlowMap
             int IntersectLocation = 0; Tuple<int, int> TargetIntersect = null;
             for (int i = 0; i < CachePath.ePath.Count; i++)
             {
-                if (!PathGrids.Contains(CachePath.ePath[i]))
+                if (!PathGrids.Contains(CachePath.ePath[i]))//PathGrid为已有的为路径的网格
                 {
                     IntersectLocation = i - 1;
                     break;
@@ -241,10 +241,11 @@ namespace PrDispalce.FlowMap
                     int Index = CachePa.ePath.IndexOf(TargetIntersect);//获取交叉点的Index
                     Path pCacheIntersectPath = new Path(TargetIntersect, CachePath.ePath[CachePath.ePath.Count - 1], CachePath.ePath.GetRange(CachePath.ePath.IndexOf(TargetIntersect), CachePath.ePath.Count - CachePath.ePath.IndexOf(TargetIntersect)));
 
-                    #region 连接的路径终点（若连接的是路径的起点，则不更新）
+                    #region 连接的路径终点更新路径（若连接的是路径的起点，则不更新）
                     if (Index == CachePa.ePath.Count - 1)
                     {
-                        CachePath.FlowOutPath.Add(CachePa);//更新CachePath的FlowOutPath
+                        pCacheIntersectPath.FlowOutPath.Add(CachePa);
+                        //CachePath.FlowOutPath.Add(CachePa);//更新CachePath的FlowOutPath
                         CachePa.FlowInPath.Add(pCacheIntersectPath);//更新CachePa的FlowInPath
 
                         CachePa.Volume = CachePa.Volume + Volume;//更新CachePa的流量

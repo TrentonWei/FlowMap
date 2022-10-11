@@ -18,7 +18,8 @@ namespace AuxStructureLib
         public List<int> IDList = new List<int>();//存储合并的建筑物ID
         public List<int> TyList = new List<int>();
         public double Volume = 0;
-        
+        public int shift = 2;//偏移情况 =2不偏移；1向左偏移；3向右偏移(在此)
+        public int LOrR = 2;//左右侧情况 =2在线上；=1左侧；=3右侧
 
         /// <summary>
         /// 获取类型
@@ -87,7 +88,13 @@ namespace AuxStructureLib
     {
         //public int ID = -1;
         public List<TriNode> PointList = null;    //节点列表
-
+        public double Length = 0;//长度
+        public double SmoothValue = 0;//光滑程度
+        public int FlowIn = 0;//流入的路径数
+        public int FlowOut = 0;//流出的路径数
+        public int FlowOutId = -1;//表示流出的路径编码ID
+        public double ShiftDis = 0;//依据宽度应该偏离的距离（如果大于0，向左偏移；如果小于0，向右偏移）
+        public List<int> FlowInIDList = new List<int>();//标识每条路径流入的路径ID
 
         public override FeatureType FeatureType
         {
@@ -175,7 +182,21 @@ namespace AuxStructureLib
             sumy = sumy / this.PointList.Count;
             return new ProxiNode(sumx, sumy, -1, this.ID, FeatureType.PolylineType); 
         }
+        /// <summary>
+        /// 计算线的长度
+        /// </summary>
+        public void GetLength()
+        {
+            Length = 0;
+            for (int i = 0; i < this.PointList.Count - 1; i++)
+            {
+                double Dis = Math.Sqrt((this.PointList[i].Y - this.PointList[i + 1].Y) * (this.PointList[i].Y - this.PointList[i + 1].Y) + (this.PointList[i].X - this.PointList[i + 1].X) * (this.PointList[i].X - this.PointList[i + 1].X));
+                Length = Length + Dis;
+            }
+        }
     }
+
+
     /// <summary>
     /// 构造函数
     /// </summary>

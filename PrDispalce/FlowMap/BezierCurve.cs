@@ -268,6 +268,8 @@ namespace PrDispalce.FlowMap
         public void CurveNGenerate(int Number, double MoveDis,int Type)
         {
             #region 判断ControlPoint是否在同一条直线上
+
+            #region 判断是否共线
             bool OnLine = true;
             if (ControlPoint.Count >= 3)//若控制点数量大于3
             {
@@ -282,6 +284,7 @@ namespace PrDispalce.FlowMap
                     }
                 }
             }
+            #endregion
 
             ///如果控制点共线（控制点只有两个点）
             #region 处理共线

@@ -49,7 +49,8 @@ namespace PrDispalce.FlowMap
         #region Line符号化
         public object LineSymbolization(double width, int LineRgbRed, int LineRgbGreen, int LineRgbBlue, esriSimpleLineStyle symbolstyle)
         {
-            ESRI.ArcGIS.Display.ISimpleLineSymbol simpleLineSymbol = new ESRI.ArcGIS.Display.SimpleLineSymbolClass();
+            width = width * 2.83;//将mm的单位转换成点的单位，Symbol的默认单位是点
+            ESRI.ArcGIS.Display.ISimpleLineSymbol simpleLineSymbol = new ESRI.ArcGIS.Display.SimpleLineSymbolClass();            
             simpleLineSymbol.Width = width;
 
             IRgbColor rgbColor1 = new RgbColorClass();

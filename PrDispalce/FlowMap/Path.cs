@@ -9,9 +9,11 @@ namespace PrDispalce.FlowMap
     {
         public Tuple<int, int> startPoint;//起点
         public Tuple<int, int> endPoint;//终点
-        public List<Tuple<int, int>> ePath;//路径(第一个点是终点；最后一个点是起点)
+        public List<Tuple<int, int>> ePath;//路径(第一个点是终点；最后一个点是起点) 编码顺序是流出点往流入点编码
         public double Length = 0;//长度
         public double Volume = 0;//流量
+        public int shift = 2;//偏移情况 =2不偏移；1向左偏移；3向右偏移(在此)
+        public int LOrR = 2;//表示是前一条边的左侧还是右侧（1左侧；3右侧）
 
         public List<Path> FlowInPath = new List<Path>();//其它路径流入的河流
         public List<Path> FlowOutPath = new List<Path>();//流入其它的路径标识

@@ -119,7 +119,7 @@ namespace PrDispalce.CGFlowMap
             List<IPoint> DesPoints = new List<IPoint>();
             List<IPoint> AllPoints = new List<IPoint>();
             Dictionary<IPoint, double> PointFlow = new Dictionary<IPoint, double>();
-            FMU.GetOD(pFeatureClass, OriginPoint, DesPoints, AllPoints, PointFlow);
+            FMU.GetOD(pFeatureClass, OriginPoint, DesPoints, AllPoints, PointFlow, pMap.SpatialReference);
             #endregion
 
             #region 获取Grids和节点编码
@@ -241,7 +241,7 @@ namespace PrDispalce.CGFlowMap
                                 {
                                     #region 考虑到搜索方向固定可能导致的重合
                                     Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
-                                    FMU.FlowCrosssingContraint(desGrids, WeighGrids, 0, desGrids[i], cFM.PathGrids[j], cFM.PathGrids);//Overlay约束
+                                    FMU.FlowCrosssingContraint(WeighGrids, 0, desGrids[i], cFM.PathGrids[j], cFM.PathGrids);//Overlay约束
                                     PathTrace Pt = new PathTrace();
                                     List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
                                     JudgeList.Add(desGrids[i]);//添加搜索的起点
@@ -391,8 +391,8 @@ namespace PrDispalce.CGFlowMap
             #region 可视化和输出
             FlowDraw FD2 = new FlowDraw(pMapControl, Grids, AllPoints, NodeInGrid, GridWithNode, OutFilePath);
             FD2.SmoothFlowMap(cFM.SubPaths, 2, 2000, 20, 1, 1, 1, 0, 200);
-            FD2.FlowMapDraw(cFM.SubPaths, 15, 2000, 20, 1, 1, 1);
-            FD2.FlowMapDraw(cFM.SubPaths, 15, 2000, 20, 1, 0, 1);
+            FD2.FlowMapDraw(cFM.SubPaths, 2, 0.05, 2000, 20, 1, 1, 1);
+            FD2.FlowMapDraw(cFM.SubPaths, 2, 0.05, 2000, 20, 1, 0, 1);
             #endregion
         }
 
@@ -414,7 +414,6 @@ namespace PrDispalce.CGFlowMap
 
             OutFilePath = outfilepath;
             this.comboBox2.Text = OutFilePath;
-        }
-    
+        }   
     }
 }

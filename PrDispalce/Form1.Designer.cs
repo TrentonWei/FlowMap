@@ -52,15 +52,15 @@
             this.flowMapToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1924, 34);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(1710, 28);
             this.menuStrip1.TabIndex = 5;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // flowMapToolStripMenuItem
             // 
             this.flowMapToolStripMenuItem.Name = "flowMapToolStripMenuItem";
-            this.flowMapToolStripMenuItem.Size = new System.Drawing.Size(102, 28);
+            this.flowMapToolStripMenuItem.Size = new System.Drawing.Size(88, 24);
             this.flowMapToolStripMenuItem.Text = "FlowMap";
             this.flowMapToolStripMenuItem.Click += new System.EventHandler(this.flowMapToolStripMenuItem_Click);
             // 
@@ -69,12 +69,12 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.移除图层ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 32);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(139, 28);
             // 
             // 移除图层ToolStripMenuItem
             // 
             this.移除图层ToolStripMenuItem.Name = "移除图层ToolStripMenuItem";
-            this.移除图层ToolStripMenuItem.Size = new System.Drawing.Size(152, 28);
+            this.移除图层ToolStripMenuItem.Size = new System.Drawing.Size(138, 24);
             this.移除图层ToolStripMenuItem.Text = "移除图层";
             this.移除图层ToolStripMenuItem.Click += new System.EventHandler(this.移除图层ToolStripMenuItem_Click);
             // 
@@ -82,7 +82,7 @@
             // 
             this.axLicenseControl1.Enabled = true;
             this.axLicenseControl1.Location = new System.Drawing.Point(740, 376);
-            this.axLicenseControl1.Margin = new System.Windows.Forms.Padding(4);
+            this.axLicenseControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.axLicenseControl1.Name = "axLicenseControl1";
             this.axLicenseControl1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axLicenseControl1.OcxState")));
             this.axLicenseControl1.Size = new System.Drawing.Size(32, 32);
@@ -91,46 +91,46 @@
             // axMapControl1
             // 
             this.axMapControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.axMapControl1.Location = new System.Drawing.Point(264, 62);
-            this.axMapControl1.Margin = new System.Windows.Forms.Padding(4);
+            this.axMapControl1.Location = new System.Drawing.Point(264, 56);
+            this.axMapControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.axMapControl1.Name = "axMapControl1";
             this.axMapControl1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMapControl1.OcxState")));
-            this.axMapControl1.Size = new System.Drawing.Size(1660, 852);
+            this.axMapControl1.Size = new System.Drawing.Size(1446, 706);
             this.axMapControl1.TabIndex = 8;
             // 
             // axTOCControl1
             // 
             this.axTOCControl1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.axTOCControl1.Location = new System.Drawing.Point(0, 62);
-            this.axTOCControl1.Margin = new System.Windows.Forms.Padding(4);
+            this.axTOCControl1.Location = new System.Drawing.Point(0, 56);
+            this.axTOCControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.axTOCControl1.Name = "axTOCControl1";
             this.axTOCControl1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axTOCControl1.OcxState")));
-            this.axTOCControl1.Size = new System.Drawing.Size(264, 852);
+            this.axTOCControl1.Size = new System.Drawing.Size(264, 706);
             this.axTOCControl1.TabIndex = 7;
             this.axTOCControl1.OnMouseDown += new ESRI.ArcGIS.Controls.ITOCControlEvents_Ax_OnMouseDownEventHandler(this.axTOCControl1_OnMouseDown_1);
             // 
             // axToolbarControl1
             // 
             this.axToolbarControl1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.axToolbarControl1.Location = new System.Drawing.Point(0, 34);
-            this.axToolbarControl1.Margin = new System.Windows.Forms.Padding(4);
+            this.axToolbarControl1.Location = new System.Drawing.Point(0, 28);
+            this.axToolbarControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.axToolbarControl1.Name = "axToolbarControl1";
             this.axToolbarControl1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axToolbarControl1.OcxState")));
-            this.axToolbarControl1.Size = new System.Drawing.Size(1924, 28);
+            this.axToolbarControl1.Size = new System.Drawing.Size(1710, 28);
             this.axToolbarControl1.TabIndex = 6;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1924, 914);
+            this.ClientSize = new System.Drawing.Size(1710, 762);
             this.Controls.Add(this.axLicenseControl1);
             this.Controls.Add(this.axMapControl1);
             this.Controls.Add(this.axTOCControl1);
             this.Controls.Add(this.axToolbarControl1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "Form1";
             this.Text = "Form1";
             this.menuStrip1.ResumeLayout(false);
