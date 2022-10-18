@@ -130,7 +130,7 @@ namespace PrDispalce.FlowMap
                 int FlowInCount = Pu.GetintValue(pFeature, "FlowIn");
                 #endregion
 
-                PolylineObject CachePoLine = new PolylineObject(NodeList);
+                PolylineObject CachePoLine = new PolylineObject(TurningTriNode);
                 CachePoLine.ShiftDis = ShiftDis;
                 CachePoLine.Volume = Volume;
                 CachePoLine.FlowOutId = FlowOutId;
@@ -217,7 +217,7 @@ namespace PrDispalce.FlowMap
         /// </summary>
         /// <param name="pFeatureLayers"></param>
         /// <returns></returns>
-        public List<Tuple<IGeometry, esriGeometryType>> GetFeatures(List<IFeatureLayer> pFeatureLayers)
+        public List<Tuple<IGeometry, esriGeometryType>> GetFeatures(List<IFeatureLayer> pFeatureLayers, ISpatialReference ISR)
         {
             List<Tuple<IGeometry, esriGeometryType>> Features = new List<Tuple<IGeometry, esriGeometryType>>();
 
@@ -230,6 +230,7 @@ namespace PrDispalce.FlowMap
                     IFeature pFeature = pFeatureClass.GetFeature(j);
 
                     IGeometry pGeometry = pFeature.Shape;
+                    pGeometry.Project(ISR);
                     Tuple<IGeometry, esriGeometryType> CacheTuple = new Tuple<IGeometry, esriGeometryType>(pGeometry, pFeatureLayers[i].FeatureClass.ShapeType);
                     Features.Add(CacheTuple);
                 }
@@ -516,7 +517,7 @@ namespace PrDispalce.FlowMap
         {
             if (Path.FlowOutPath.Count > 0)
             {
-                if (Path.FlowOutPath[0].ePath.Count > 1)//如果汇入不是起点
+                if (Path.FlowOutPath[0].ePath.Count > 1 && Path.ePath.Count>1)//如果汇入不是起点且不是路径中的某点
                 {
                     IPoint sPoint = new PointClass();
                     sPoint.X = (Grids[Path.FlowOutPath[0].ePath[Path.FlowOutPath[0].ePath.Count - 2]][0] + Grids[Path.FlowOutPath[0].ePath[Path.FlowOutPath[0].ePath.Count - 2]][2]) / 2;//倒数第二个点
@@ -558,10 +559,10 @@ namespace PrDispalce.FlowMap
             double Angle = 0;
             PrDispalce.FlowMap.PublicUtil PU = new PublicUtil();
        
-            if (Path.FlowOutPath.Count > 0)//路径不是起点
+            if (Path.FlowOutPath.Count > 0 &&Path.ePath.Count>1)//路径不是起点
             { 
                 #region 如果汇入的点不是起点
-                if (Path.FlowOutPath[0].ePath.Count > 1) //判断该点不是起源点！
+                if (Path.FlowOutPath[0].ePath.Count > 1 && Path.ePath.Count>1) //判断该点不是起源点！且点不是路径的一部分
                 {
                     IPoint CachePoint = new PointClass();
                     CachePoint.X = (Grids[Path.FlowOutPath[0].ePath[Path.FlowOutPath[0].ePath.Count - 2]][0] + Grids[Path.FlowOutPath[0].ePath[Path.FlowOutPath[0].ePath.Count - 2]][2]) / 2;
@@ -626,7 +627,7 @@ namespace PrDispalce.FlowMap
             double CurAngle = 0;
             if (Path.FlowOutPath.Count > 0) //不是起点作为路径
             {
-                if (Path.FlowOutPath[0].ePath.Count > 1)//如果汇入不是起点
+                if (Path.FlowOutPath[0].ePath.Count > 1 && Path.ePath.Count>1)//如果汇入不是起点;且节点不是已有路径的一部分！
                 {
                     #region 获得当前路径的位置
                     Dictionary<double, Path> AngleDic = new Dictionary<double, Path>();//能这样初始化的原因是本研究对于同一个节点不存在相同方向的Path
@@ -709,7 +710,7 @@ namespace PrDispalce.FlowMap
 
             #region 计算过程
             double CurAngle = 0;
-            if (TarPL.FlowOut > 0)//1. 路径不是起点；
+            if (TarPL.FlowOut > 0 && TarPL.PointList.Count>1)//1. 路径不是起点且非路径中的点
             {
                 if (PLList[TarPL.FlowOutId].FlowOut > 0)//2.路径不是汇入起点的路径
                 {
@@ -955,7 +956,7 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
-        /// 添加FlowPath与destination重叠的约束条件（移除非TarGrid中其它格点k阶邻近范围内的点）考虑重叠和节点间疏密的约束!!!
+        /// 添加FlowPath与destination重叠的约束条件（移除非TarGrid中其它格点k阶邻近范围内的点）考虑重叠和节点间疏密的约束!!!【考虑所有Des重叠的调整】
         /// </summary>
         /// <param name="desGrids">desPoint的格网</param>
         /// <param name="WeighGrids">权重格网</param>
@@ -965,7 +966,7 @@ namespace PrDispalce.FlowMap
         {
             for (int n = 0; n < desGrids.Count; n++)
             {
-                if (desGrids[n].Item1 != TaretDes.Item1 && desGrids[n].Item2 != TaretDes.Item2)
+                if (desGrids[n].Item1 != TaretDes.Item1 || desGrids[n].Item2 != TaretDes.Item2)
                 {
                     List<Tuple<int, int>> NearGrids = Fs.GetNearGrids_2(desGrids,desGrids[n], WeighGrids.Keys.ToList(), k);
 
@@ -981,19 +982,46 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
-        /// 添加FlowPath与destination重叠的约束条件（移除非TarGrid中其它格点k阶邻近范围内的点）考虑重叠和节点间疏密的约束!!!
+        /// 添加FlowPath与destination重叠的约束条件（移除非TarGrid中其它格点k阶邻近范围内的点）考虑重叠和节点间疏密的约束!!!【只自适应调整TaretDes】
         /// </summary>
         /// <param name="desGrids">desPoint的格网</param>
         /// <param name="WeighGrids">权重格网</param>
         /// <param name="k">删除的限制数量</param>K=1表示自身；=2表示2阶邻近
         /// <param name="j">当前格网编码</param>
-        public void FlowOverLayContraint_3(List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, IPoint> GridWithNode, Dictionary<Tuple<int, int>, double> WeighGrids, int k, Tuple<int, int> TaretDes, Dictionary<Tuple<int, int>, List<double>> GridValue)
+        public void FlowOverLayContraint_2Tar(List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, double> WeighGrids, int k, Tuple<int, int> TargetDes)
         {
             for (int n = 0; n < desGrids.Count; n++)
             {
-                if (desGrids[n].Item1 != TaretDes.Item1 || desGrids[n].Item2 != TaretDes.Item2)
+                if (desGrids[n].Item1 != TargetDes.Item1 || desGrids[n].Item2 != TargetDes.Item2)
                 {
-                    List<Tuple<int, int>> NearGrids = Fs.GetNearGrids_3(desGrids, desGrids[n], GridWithNode, WeighGrids.Keys.ToList(), GridValue,k);
+                    List<Tuple<int, int>> NearGrids = Fs.GetNearGrids_2Tar(desGrids, desGrids[n], TargetDes, WeighGrids.Keys.ToList(), k);
+
+                    foreach (Tuple<int, int> Grid in NearGrids)
+                    {
+                        if (WeighGrids.Keys.Contains(Grid))
+                        {
+                            WeighGrids.Remove(Grid);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 添加FlowPath与destination重叠的约束条件（移除非TarGrid中其它格点k阶邻近范围内的点）考虑重叠和节点间疏密的约束!!!
+        /// 即针对k=0时做了特殊考虑
+        /// </summary>
+        /// <param name="desGrids">desPoint的格网</param>
+        /// <param name="WeighGrids">权重格网</param>
+        /// <param name="k">删除的限制数量</param>K=1表示自身；=2表示2阶邻近
+        /// <param name="j">当前格网编码</param>
+        public void FlowOverLayContraint_3Tar(List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, IPoint> GridWithNode, Dictionary<Tuple<int, int>, double> WeighGrids, int k, Tuple<int, int> TargetDes, Dictionary<Tuple<int, int>, List<double>> GridValue,bool SpecialK)
+        {
+            for (int n = 0; n < desGrids.Count; n++)
+            {
+                if (desGrids[n].Item1 != TargetDes.Item1 || desGrids[n].Item2 != TargetDes.Item2)
+                {
+                    List<Tuple<int, int>> NearGrids = Fs.GetNearGrids_3(desGrids, desGrids[n], TargetDes, GridWithNode, WeighGrids.Keys.ToList(), GridValue, k, SpecialK);
 
                     foreach (Tuple<int, int> Grid in NearGrids)
                     {
@@ -1012,8 +1040,27 @@ namespace PrDispalce.FlowMap
         /// <param name="WeighGrids">权重格网</param>
         /// <param name="k">删除的限制数量</param>K=1表示自身；=2表示2阶邻近
         /// <param name="j">当前格网编码</param>
-        public void FlowCrosssingContraint(Dictionary<Tuple<int, int>, double> WeighGrids, int k, Tuple<int, int> TaretDes,Tuple<int,int> OriginGrid,List<Tuple<int,int>> PathGrids)
+        public void FlowCrosssingContraint(Dictionary<Tuple<int, int>, double> WeighGrids, int k, Tuple<int, int> TaretDes, Tuple<int, int> OriginGrid, List<Tuple<int, int>> PathGrids)
+            //public void FlowCrosssingContraint(List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, double> WeighGrids, int k, Tuple<int, int> TaretDes, Tuple<int, int> OriginGrid, List<Tuple<int, int>> PathGrids)
         {
+            //#region 移除Desgrids
+            //for (int n = 0; n < desGrids.Count; n++)
+            //{
+            //    if (desGrids[n].Item1 != TaretDes.Item1 || desGrids[n].Item2 != TaretDes.Item2)
+            //    {
+            //        List<Tuple<int, int>> NearGrids = Fs.GetNearGrids(desGrids[n], WeighGrids.Keys.ToList(), k);
+
+            //        foreach (Tuple<int, int> Grid in NearGrids)
+            //        {
+            //            if (WeighGrids.ContainsKey(Grid))
+            //            {
+            //                WeighGrids.Remove(Grid);
+            //            }
+            //        }
+            //    }
+            //}
+            //#endregion
+
             #region 移除PathGrids
             for (int n = 0; n < PathGrids.Count; n++)
             {
@@ -1051,8 +1098,6 @@ namespace PrDispalce.FlowMap
                     DesDirPt.Add(Grid, CacheDirPt);
                 }
             }
-
-
             return DesDirPt;
         }
 
@@ -1069,6 +1114,28 @@ namespace PrDispalce.FlowMap
             foreach (Tuple<int, int> Grid in desGrids)
             {
                 Dictionary<int, PathTrace> CacheDirPt = this.GetDirPt_2(pWeighGrids, Grid, desGrids, Grid, k);
+                if (!DesDirPt.ContainsKey(Grid))
+                {
+                    DesDirPt.Add(Grid, CacheDirPt);
+                }
+            }
+
+            return DesDirPt;
+        }
+
+        /// <summary>
+        /// 获得给定的所有des节点在不同方向下的搜索图(只考虑了0阶的Overlay约束)
+        /// </summary>
+        /// <param name="pWeighGrids"></param>
+        /// <param name="desGrids"></param>
+        /// <returns></returns>
+        public Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> GetDesDirPt_3(Dictionary<Tuple<int, int>, IPoint> GridWithNode, Dictionary<Tuple<int, int>, double> pWeighGrids, List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, List<double>> GridValue, int k)
+        {
+            Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = new Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>>();
+
+            foreach (Tuple<int, int> Grid in desGrids)
+            {
+                Dictionary<int, PathTrace> CacheDirPt = this.GetDirPt_3(GridWithNode, pWeighGrids, Grid, desGrids, GridValue, Grid, k);
                 if (!DesDirPt.ContainsKey(Grid))
                 {
                     DesDirPt.Add(Grid, CacheDirPt);
@@ -1155,7 +1222,7 @@ namespace PrDispalce.FlowMap
                 #endregion
 
                 Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
-                this.FlowOverLayContraint(desGrids, WeighGrids, 0, TargetDes);//Overlay约束
+                //this.FlowOverLayContraint(desGrids, WeighGrids, 0, TargetDes);//Overlay约束
                 PathTrace Pt = new PathTrace();
                 List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
                 JudgeList.Add(Grid);//添加搜索的起点
@@ -1225,7 +1292,81 @@ namespace PrDispalce.FlowMap
                 #endregion
 
                 Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
-                this.FlowOverLayContraint_2(desGrids, WeighGrids, k, TargetDes);//Overlay约束
+                //this.FlowOverLayContraint_2(desGrids, WeighGrids, k, TargetDes);//Overlay约束
+                this.FlowOverLayContraint_2Tar(desGrids, WeighGrids, k, TargetDes);//Overlay约束
+                PathTrace Pt = new PathTrace();
+                List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
+                JudgeList.Add(Grid);//添加搜索的起点
+                Pt.MazeAlg(JudgeList, WeighGrids, 1, DirList);//备注：每次更新以后,WeightGrid会清零  
+
+                int Number = this.GetNumber(DirList);
+                DirPt.Add(Number, Pt);
+            }
+
+            return DirPt;
+        }
+
+        /// <summary>
+        /// 获得给定节点不同约束方向下的搜索图1（考虑n阶的Overlay约束）
+        /// </summary>
+        /// <param name="WeighGrids">权重格网</param>
+        /// <param name="Grid">目标网格</param>
+        /// <param name="desGrids">所有目标格网</param>
+        /// <param name="i">当前格网编号</param>
+        /// Grid 目标格网
+        /// TargetDes 出发格网
+        /// <returns></returns>获取给定节点不同方向编码的路径搜索
+        public Dictionary<int, PathTrace> GetDirPt_3(Dictionary<Tuple<int, int>, IPoint> GridWithNode, Dictionary<Tuple<int, int>, double> pWeighGrids, Tuple<int, int> Grid, List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, List<double>> GridValue,Tuple<int, int> TargetDes, int k)
+        {
+            Dictionary<int, PathTrace> DirPt = new Dictionary<int, PathTrace>();
+            for (int n = 0; n < 9; n++)
+            {
+                #region 获取DirList
+                List<int> DirList = new List<int>();
+                if (n >= 4 && n <= 6)
+                {
+                    DirList.Add(n);
+                    DirList.Add(n + 1);
+                    DirList.Add(n + 2);
+                }
+
+                else if (n >= 1 && n <= 3)
+                {
+                    DirList.Add(n + 2);
+                    DirList.Add(n + 1);
+                    DirList.Add(n);
+                }
+
+                else if (n == 0)
+                {
+                    DirList.Add(2);
+                    DirList.Add(1);
+                    DirList.Add(8);
+                }
+
+                else if (n == 7)
+                {
+                    DirList.Add(7);
+                    DirList.Add(8);
+                    DirList.Add(1);
+                }
+
+                else if (n == 8)
+                {
+                    DirList.Add(1);
+                    DirList.Add(2);
+                    DirList.Add(3);
+                    DirList.Add(4);
+                    DirList.Add(5);
+                    DirList.Add(6);
+                    DirList.Add(7);
+                    DirList.Add(8);
+                }
+                #endregion
+
+                Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
+                //this.FlowOverLayContraint_2(desGrids, WeighGrids, k, TargetDes);//Overlay约束
+                this.FlowOverLayContraint_3Tar(desGrids, GridWithNode, WeighGrids, k, TargetDes, GridValue, true);//Overlay约束
                 PathTrace Pt = new PathTrace();
                 List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
                 JudgeList.Add(Grid);//添加搜索的起点
@@ -1793,6 +1934,25 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
+        /// 判断给定的Grid与路径是否相交是否相交
+        /// </summary>
+        /// <param name="CachePath">给定路径</param>
+        /// <param name="PathGrids">已生成的路径Grids</param>
+        /// <returns>=true表示相交；=false表示不相交</returns>
+        public bool IntersectGrid(Tuple<int, int> TaGrid, List<Tuple<int, int>> PathGrids)
+        {
+            if (this.GridContain(TaGrid, PathGrids))
+            {
+                return true;
+            }
+
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 判断新生成的路径是否相交
         /// </summary>
         /// <param name="CachePath">给定路径</param>
@@ -1838,6 +1998,27 @@ namespace PrDispalce.FlowMap
                 return 0;
             }
         }
+
+        /// <summary>
+        /// 判断新生成的路径是否相交
+        /// </summary>
+        /// <param name="CachePath">给定路径</param>
+        /// <param name="PathGrids">已生成的路径Grids</param>
+        /// <returns>=true表示相交；=false表示不相交</returns>
+        public bool IntersectGridInt(List<Tuple<int, int>> CacheShortPath, List<Tuple<int, int>> DesGrids)
+        {
+            for (int i = 0; i < CacheShortPath.Count; i++)
+            {
+                if (this.GridContain(CacheShortPath[0], DesGrids))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    
+    
 
         /// <summary>
         /// 计算给定DesGrid到PathGrids的直线距离（不考虑搜索路径）

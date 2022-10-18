@@ -355,8 +355,9 @@ namespace PrDispalce.FlowMap
 
             return GridType;
         }
+
         /// <summary>
-        /// 针对制定范围构建索引
+        /// 针对指定范围构建索引（删除存在阻隔的格网！！！）
         /// </summary>
         /// <param name="ENVELOPE"></param> [MinX,MinY,MaxX,MaxY]【左下角往右上角编码】
         /// <param name="gridXY"></param>[格网横向、纵向间隔]
@@ -670,7 +671,7 @@ namespace PrDispalce.FlowMap
         /// <param name="PointInGrids"></param>
         /// <param name="PointFlow"></param>
         /// <param name="NearT"></param>
-        /// Type=1邻域范围内的总数；邻域范围内的平均值
+        /// Type=1邻域范围内的总数；2邻域范围内的平均值；3不考虑k的定义；
         /// <returns></returns>
         public Dictionary<Tuple<int, int>, double> GetWeighGrid(Dictionary<Tuple<int, int>, List<double>> TargetGrids, Dictionary<Tuple<int, int>,IPoint> PointInGrids,Dictionary<IPoint,double> PointFlow, int NearT,int Type)
         {
@@ -698,6 +699,10 @@ namespace PrDispalce.FlowMap
                 else if (Type == 2)
                 {
                     Weigth = SumFlow / NearGrids.Count;
+                }
+                else if (Type == 3)
+                {
+                    Weigth = 10;//等于一个常数
                 }
 
                 WeighGrids.Add(kv.Key, Weigth);
@@ -745,13 +750,40 @@ namespace PrDispalce.FlowMap
         public List<Tuple<int, int>> GetNearGrids_2(List<Tuple<int, int>> desGrids, Tuple<int, int> TargetGrid, List<Tuple<int, int>> Grids, int NearT)
         {
             List<Tuple<int, int>> NearGrids = new List<Tuple<int, int>>();
-            bool ReturnLabel = true;
+            
 
             #region 判断过程(n阶表示2*N的邻近)
-            NearT = NearT + 1;
-            do
+            //bool ReturnLabel = true;
+            //NearT = NearT + 1;
+            //do
+            //{
+            //    NearT = NearT - 1; ReturnLabel = true;
+            //    for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+            //    {
+            //        for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+            //        {
+            //            Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+            //            if (Grids.Contains(CacheGrid))
+            //            {
+            //                NearGrids.Add(CacheGrid);
+            //            }
+
+            //            if (desGrids.Contains(CacheGrid) && i != TargetGrid.Item1 && j != TargetGrid.Item2)
+            //            {
+            //                ReturnLabel = false;
+            //            }
+            //        }
+            //    }
+            //} while (!ReturnLabel && NearT > 0);
+            #endregion
+
+            #region 判断过程
+            if (NearT == -1)
             {
-                NearT = NearT - 1; ReturnLabel = true;
+                return null;
+            }
+            else
+            {
                 for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
                 {
                     for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
@@ -764,13 +796,55 @@ namespace PrDispalce.FlowMap
 
                         if (desGrids.Contains(CacheGrid) && i != TargetGrid.Item1 && j != TargetGrid.Item2)
                         {
-                            ReturnLabel = false;
+                            NearT = NearT - 1;
+                            NearGrids = this.GetNearGrids_2(desGrids, TargetGrid, Grids, NearT);
                         }
                     }
                 }
-            } while (!ReturnLabel && NearT > 0);
+            }
             #endregion
 
+            return NearGrids;
+        }
+
+        /// <summary>
+        /// 获取给定Grid的k阶邻近（邻近要素包含了自身）考虑重叠和节点间疏密的约束!!!
+        /// </summary>
+        /// desGrids=desPoint的格网</param>
+        /// <param name="TargetGrid">目标Grid</param>
+        /// <param name="Grids">格网</param>
+        /// <param name="NearT">k阶邻近</param>
+        /// <returns></returns>
+        public List<Tuple<int, int>> GetNearGrids_2Tar(List<Tuple<int, int>> desGrids, Tuple<int, int> TargetGrid, Tuple<int, int> StartGrid, List<Tuple<int, int>> Grids, int NearT)
+        {
+            List<Tuple<int, int>> NearGrids = new List<Tuple<int, int>>();
+
+            #region 判断过程
+            if (NearT == -1)
+            {
+                return null;
+            }
+            else
+            {
+                for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+                {
+                    for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+                    {
+                        Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+                        if (Grids.Contains(CacheGrid))
+                        {
+                            NearGrids.Add(CacheGrid);
+                        }
+
+                        if (CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2)
+                        {
+                            NearT = NearT - 1;
+                            NearGrids = this.GetNearGrids_2Tar(desGrids, TargetGrid, StartGrid,Grids, NearT);
+                        }
+                    }
+                }
+            }
+            #endregion
 
             return NearGrids;
         }
@@ -784,81 +858,101 @@ namespace PrDispalce.FlowMap
         /// Dictionary<Tuple<int, int>, IPoint> GridWithNode 表示Grid对应的节点
         /// <param name="Grids">格网</param>
         /// <param name="NearT">k阶邻近</param>
+        /// GridValue 表示格网的横纵坐标
+        /// GridwithNode表示格网包含点信息
         /// <returns></returns>
-        public List<Tuple<int, int>> GetNearGrids_3(List<Tuple<int, int>> desGrids, Tuple<int, int> TargetGrid, Dictionary<Tuple<int, int>, IPoint> GridWithNode,List<Tuple<int, int>> Grids, Dictionary<Tuple<int, int>, List<double>> GridValue,int NearT)
+        public List<Tuple<int, int>> GetNearGrids_3(List<Tuple<int, int>> desGrids, Tuple<int, int> TargetGrid, Tuple<int, int> StartGrid, Dictionary<Tuple<int, int>, IPoint> GridWithNode, List<Tuple<int, int>> Grids, Dictionary<Tuple<int, int>, List<double>> GridValue, int NearT,bool Specialk)
         {
             List<Tuple<int, int>> NearGrids = new List<Tuple<int, int>>();
-            bool ReturnLabel = true;
 
-            if (NearT == 0)
+            #region NearT=-1
+            if (NearT == -1)
+            {
+                return null;
+            }
+            #endregion
+
+            #region NearT=0
+            else if (NearT == 0 && Specialk)
             {
                 NearT = NearT + 1;
                 IPoint sPoint = new PointClass();
                 sPoint.X = GridWithNode[TargetGrid].X;
-                sPoint.Y = GridWithNode[TargetGrid].Y; 
+                sPoint.Y = GridWithNode[TargetGrid].Y;
 
-                double XDis=Math.Abs(GridValue[TargetGrid][2]-GridValue[TargetGrid][0]);
-                double YDis=Math.Abs(GridValue[TargetGrid][3]-GridValue[TargetGrid][1]);
-                
+                double XDis = Math.Abs(GridValue[TargetGrid][2] - GridValue[TargetGrid][0]);
+                double YDis = Math.Abs(GridValue[TargetGrid][3] - GridValue[TargetGrid][1]);
+
                 for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
                 {
                     for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
                     {
                         Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
-                        double Dis = this.GetPointGridDis(sPoint, GridValue[CacheGrid]);
+                        Tuple<double,double> DisXY = this.GetPointGridDis(sPoint, GridValue[CacheGrid]);
 
-                        if (Dis < 0.1 * XDis || Dis < 0.1 * YDis)
+                        //if (CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2)//如果存在其它Grid在给定的Grid中，就只删除对应格点即可！！
+                        //{
+                        //    NearGrids.Clear();
+                        //    NearGrids.Add(TargetGrid);
+                        //    return NearGrids;
+                        //}
+
+                        //if (DisXY.Item1< 0.5 * XDis && DisXY.Item2 < 0.5 * YDis)
+                        //{
+                        //    NearGrids.Add(CacheGrid);
+                        //}
+
+                        if (DisXY.Item1 < 0.5 * XDis && DisXY.Item2 < 0.5 * YDis && !(CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2))
                         {
                             NearGrids.Add(CacheGrid);
                         }
                     }
                 }
             }
+            #endregion
 
+            #region NearT>0
             else
             {
-                #region 判断过程(n阶表示2*N的邻近)
-                NearT = NearT + 1;
-                do
+                for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
                 {
-                    NearT = NearT - 1; ReturnLabel = true;
-                    for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+                    for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
                     {
-                        for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+                        Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+                        if (Grids.Contains(CacheGrid))
                         {
-                            Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
-                            if (Grids.Contains(CacheGrid))
-                            {
-                                NearGrids.Add(CacheGrid);
-                            }
+                            NearGrids.Add(CacheGrid);
+                        }
 
-                            if (desGrids.Contains(CacheGrid) && i != TargetGrid.Item1 && j != TargetGrid.Item2)
-                            {
-                                ReturnLabel = false;
-                            }
+                        if (CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2)
+                        {
+                            NearT = NearT - 1;
+                            Specialk = false;
+                            NearGrids = this.GetNearGrids_3(desGrids, TargetGrid, StartGrid,GridWithNode, Grids,GridValue, NearT,Specialk);
                         }
                     }
-                } while (!ReturnLabel && NearT > 0);
-                #endregion
+                }
             }
+
+            #endregion
 
             return NearGrids;
         }
 
         /// <summary>
-        /// 获取给定点到Grid的最小距离
+        /// 获取给定点到Grid的最小距离(X轴和Y轴上的最小距离)
         /// </summary>
         /// <param name="sPoint">给定点</param>
         /// <param name="Grid">格网 0,2 X；1,3 Y</param>
         /// <returns></returns>
-        double GetPointGridDis(IPoint sPoint,List<double> Grid)
+        Tuple<double,double> GetPointGridDis(IPoint sPoint,List<double> Grid)
         {
-            double Dis=0;
+            Tuple<double, double> DisXY;
             List<double> DisList = new List<double>();
 
             if ((Grid[0] - sPoint.X) * (Grid[2] - sPoint.X) <= 0 && (Grid[1] - sPoint.Y) * (Grid[3] - sPoint.Y) <= 0)
             {
-                Dis = 0;
+                DisXY = new Tuple<double, double>(0, 0);
             }
 
             else
@@ -868,9 +962,10 @@ namespace PrDispalce.FlowMap
                 double Dis3 = Math.Abs(Grid[2] - sPoint.X); DisList.Add(Dis3);
                 double Dis4 = Math.Abs(Grid[3] - sPoint.Y); DisList.Add(Dis4);
 
-                Dis = DisList.Min();
+                DisXY = new Tuple<double, double>(Math.Min(Dis1, Dis3), Math.Min(Dis2, Dis4));    
             }
-            return Dis;
+
+            return DisXY;
         }
 
         /// <summary>

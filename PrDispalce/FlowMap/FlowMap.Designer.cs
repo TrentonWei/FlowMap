@@ -63,8 +63,12 @@
             this.button27 = new System.Windows.Forms.Button();
             this.button25 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button30 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.button29 = new System.Windows.Forms.Button();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.button28 = new System.Windows.Forms.Button();
             this.button26 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.comboBox5 = new System.Windows.Forms.ComboBox();
@@ -73,12 +77,10 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.button28 = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -429,14 +431,14 @@
             this.groupBox1.Controls.Add(this.button13);
             this.groupBox1.Location = new System.Drawing.Point(506, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(788, 413);
+            this.groupBox1.Size = new System.Drawing.Size(788, 356);
             this.groupBox1.TabIndex = 32;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Experimental use";
             // 
             // button27
             // 
-            this.button27.Location = new System.Drawing.Point(19, 384);
+            this.button27.Location = new System.Drawing.Point(19, 327);
             this.button27.Name = "button27";
             this.button27.Size = new System.Drawing.Size(282, 23);
             this.button27.TabIndex = 33;
@@ -455,27 +457,39 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.button30);
             this.groupBox2.Controls.Add(this.button2);
             this.groupBox2.Controls.Add(this.button21);
             this.groupBox2.Location = new System.Drawing.Point(12, 98);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(450, 94);
+            this.groupBox2.Size = new System.Drawing.Size(450, 146);
             this.groupBox2.TabIndex = 33;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "User use without node shift（Geoprj won\'t influence）";
+            // 
+            // button30
+            // 
+            this.button30.Location = new System.Drawing.Point(7, 87);
+            this.button30.Name = "button30";
+            this.button30.Size = new System.Drawing.Size(402, 23);
+            this.button30.TabIndex = 30;
+            this.button30.Text = "US Data Layout generation(Not Node shift) V2.0";
+            this.button30.UseVisualStyleBackColor = true;
+            this.button30.Click += new System.EventHandler(this.button30_Click);
             // 
             // button2
             // 
             this.button2.Location = new System.Drawing.Point(6, 57);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(351, 23);
+            this.button2.Size = new System.Drawing.Size(403, 23);
             this.button2.TabIndex = 29;
-            this.button2.Text = "US Data Layout generation(Not Albers)";
+            this.button2.Text = "US Data Layout generation(Not Node shift) V1.0";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click_1);
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.button29);
             this.groupBox3.Controls.Add(this.checkBox3);
             this.groupBox3.Controls.Add(this.button28);
             this.groupBox3.Controls.Add(this.button26);
@@ -490,12 +504,42 @@
             this.groupBox3.Controls.Add(this.textBox1);
             this.groupBox3.Controls.Add(this.label5);
             this.groupBox3.Controls.Add(this.label4);
-            this.groupBox3.Location = new System.Drawing.Point(12, 217);
+            this.groupBox3.Location = new System.Drawing.Point(5, 290);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(450, 252);
+            this.groupBox3.Size = new System.Drawing.Size(450, 277);
             this.groupBox3.TabIndex = 34;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Smooth process with node shift(Geoprj will influence)";
+            // 
+            // button29
+            // 
+            this.button29.Location = new System.Drawing.Point(10, 245);
+            this.button29.Name = "button29";
+            this.button29.Size = new System.Drawing.Size(377, 23);
+            this.button29.TabIndex = 14;
+            this.button29.Text = "Smooth with node shift (with Geoprj) V2.0";
+            this.button29.UseVisualStyleBackColor = true;
+            this.button29.Click += new System.EventHandler(this.button29_Click);
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(213, 56);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(165, 19);
+            this.checkBox3.TabIndex = 13;
+            this.checkBox3.Text = "CurrentView Scale";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            // 
+            // button28
+            // 
+            this.button28.Location = new System.Drawing.Point(10, 215);
+            this.button28.Name = "button28";
+            this.button28.Size = new System.Drawing.Size(377, 23);
+            this.button28.TabIndex = 12;
+            this.button28.Text = "Smooth with node shift (with Geoprj) V1.0";
+            this.button28.UseVisualStyleBackColor = true;
+            this.button28.Click += new System.EventHandler(this.button28_Click);
             // 
             // button26
             // 
@@ -568,6 +612,15 @@
             this.textBox2.TabIndex = 4;
             this.textBox2.Text = "40";
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(14, 87);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(71, 15);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "MaxWidth";
+            // 
             // textBox1
             // 
             this.textBox1.Location = new System.Drawing.Point(37, 53);
@@ -594,40 +647,11 @@
             this.label4.TabIndex = 0;
             this.label4.Text = "Scale for visualization ";
             // 
-            // button28
-            // 
-            this.button28.Location = new System.Drawing.Point(10, 215);
-            this.button28.Name = "button28";
-            this.button28.Size = new System.Drawing.Size(377, 23);
-            this.button28.TabIndex = 12;
-            this.button28.Text = "Smooth with node shift (with Geoprj)";
-            this.button28.UseVisualStyleBackColor = true;
-            this.button28.Click += new System.EventHandler(this.button28_Click);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(14, 87);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 15);
-            this.label6.TabIndex = 3;
-            this.label6.Text = "MaxWidth";
-            // 
-            // checkBox3
-            // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(213, 56);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(165, 19);
-            this.checkBox3.TabIndex = 13;
-            this.checkBox3.Text = "CurrentView Scale";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            // 
             // FlowMap
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1306, 523);
+            this.ClientSize = new System.Drawing.Size(1306, 586);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -704,5 +728,7 @@
         private System.Windows.Forms.Button button28;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.Button button29;
+        private System.Windows.Forms.Button button30;
     }
 }
