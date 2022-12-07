@@ -888,23 +888,27 @@ namespace PrDispalce.FlowMap
                     for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
                     {
                         Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
-                        Tuple<double,double> DisXY = this.GetPointGridDis(sPoint, GridValue[CacheGrid]);
 
-                        //if (CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2)//如果存在其它Grid在给定的Grid中，就只删除对应格点即可！！
-                        //{
-                        //    NearGrids.Clear();
-                        //    NearGrids.Add(TargetGrid);
-                        //    return NearGrids;
-                        //}
-
-                        //if (DisXY.Item1< 0.5 * XDis && DisXY.Item2 < 0.5 * YDis)
-                        //{
-                        //    NearGrids.Add(CacheGrid);
-                        //}
-
-                        if (DisXY.Item1 < 0.5 * XDis && DisXY.Item2 < 0.5 * YDis && !(CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2))
+                        if (GridValue.ContainsKey(CacheGrid))
                         {
-                            NearGrids.Add(CacheGrid);
+                            Tuple<double, double> DisXY = this.GetPointGridDis(sPoint, GridValue[CacheGrid]);
+
+                            if (DisXY.Item1 < 0.5 * XDis && DisXY.Item2 < 0.5 * YDis && (CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2))//如果存在其它Grid在给定的Grid中，就只删除对应格点即可！！
+                            {
+                                NearGrids.Clear();
+                                NearGrids.Add(TargetGrid);
+                                return NearGrids;
+                            }
+
+                            //if (DisXY.Item1< 0.5 * XDis && DisXY.Item2 < 0.5 * YDis)
+                            //{
+                            //    NearGrids.Add(CacheGrid);
+                            //}
+
+                            if (DisXY.Item1 < 0.5 * XDis && DisXY.Item2 < 0.5 * YDis && !(CacheGrid.Item1 == StartGrid.Item1 && CacheGrid.Item2 == StartGrid.Item2))
+                            {
+                                NearGrids.Add(CacheGrid);
+                            }
                         }
                     }
                 }

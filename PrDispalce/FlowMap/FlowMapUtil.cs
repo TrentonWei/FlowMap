@@ -781,6 +781,7 @@ namespace PrDispalce.FlowMap
                 if(pMapControl!=null)
                 {
                      NodeShiftDis=this.ConvertLengthToMapDis(RealWidth,pMapControl.MapUnits,out unitDescriptor);
+                     int test;
                 }
             }
             #endregion
@@ -834,7 +835,7 @@ namespace PrDispalce.FlowMap
                     unitDescriptor = "毫米"; break;
                 // "厘米";
                 case esriUnits.esriCentimeters:
-                    length = length / 100 / 1000;
+                    length = length * 100 * 1000;
                     unitDescriptor = "厘米"; break;
                 // "公里";
                 case esriUnits.esriKilometers:
@@ -1151,14 +1152,14 @@ namespace PrDispalce.FlowMap
         /// <param name="pWeighGrids"></param>
         /// <param name="desGrids"></param>
         /// <returns></returns>
-        public Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> GetDesDirPtDis(Dictionary<Tuple<int, int>, double> pWeighGrids, List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, int> GridType)
+        public Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> GetDesDirPtDis(Dictionary<Tuple<int, int>, IPoint> GridWithNode, Dictionary<Tuple<int, int>, double> pWeighGrids, List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, int> GridType, Dictionary<Tuple<int, int>, List<double>> GridValue, int k)
         {
             Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = new Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>>();
 
 
             foreach (Tuple<int, int> Grid in desGrids)
             {
-                Dictionary<int, PathTrace> CacheDirPt = this.GetDirPtDis(pWeighGrids, Grid, desGrids, Grid, GridType);
+                Dictionary<int, PathTrace> CacheDirPt = this.GetDirPtDis(GridWithNode, pWeighGrids, Grid, desGrids, Grid, GridType, GridValue, k);
                 DesDirPt.Add(Grid, CacheDirPt);
             }
 
@@ -1222,7 +1223,7 @@ namespace PrDispalce.FlowMap
                 #endregion
 
                 Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
-                //this.FlowOverLayContraint(desGrids, WeighGrids, 0, TargetDes);//Overlay约束
+                this.FlowOverLayContraint(desGrids, WeighGrids, 0, TargetDes);//Overlay约束
                 PathTrace Pt = new PathTrace();
                 List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
                 JudgeList.Add(Grid);//添加搜索的起点
@@ -1387,7 +1388,7 @@ namespace PrDispalce.FlowMap
         /// <param name="desGrids">所有目标格网</param>
         /// <param name="i">当前格网编号</param>
         /// <returns></returns>获取给定节点不同方向编码的路径搜索
-        public Dictionary<int, PathTrace> GetDirPtDis(Dictionary<Tuple<int, int>, double> pWeighGrids, Tuple<int, int> Grid, List<Tuple<int, int>> desGrids, Tuple<int, int> TargetDes, Dictionary<Tuple<int, int>, int> GridType)
+        public Dictionary<int, PathTrace> GetDirPtDis(Dictionary<Tuple<int, int>, IPoint> GridWithNode, Dictionary<Tuple<int, int>, double> pWeighGrids, Tuple<int, int> Grid, List<Tuple<int, int>> desGrids, Tuple<int, int> TargetDes, Dictionary<Tuple<int, int>, int> GridType, Dictionary<Tuple<int, int>, List<double>> GridValue,int k)
         {
             Dictionary<int, PathTrace> DirPt = new Dictionary<int, PathTrace>();
             for (int n = 0; n < 9; n++)
@@ -1438,7 +1439,8 @@ namespace PrDispalce.FlowMap
                 Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
                 Dictionary<Tuple<int, int>, int> pGridVisit = Clone((object)GridType) as Dictionary<Tuple<int, int>, int>;//深拷贝
 
-                this.FlowOverLayContraint(desGrids, WeighGrids, 0, TargetDes);//Overlay约束
+                //this.FlowOverLayContraint(desGrids, WeighGrids, 0, TargetDes);//Overlay约束
+                this.FlowOverLayContraint_3Tar(desGrids, GridWithNode, WeighGrids, k, TargetDes, GridValue, true);//Overlay约束
                 PathTrace Pt = new PathTrace();
                 List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
                 JudgeList.Add(Grid);//添加搜索的起点

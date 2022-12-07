@@ -191,13 +191,18 @@ namespace PrDispalce.FlowMap
 
                 if (LayerDataset != null)
                 {
-                    this.comboBox1.Items.Add(strLayerName);
                     this.comboBox3.Items.Add(strLayerName);
 
                     IFeatureLayer pFeatureLayer = pLayer as IFeatureLayer;
                     if (pFeatureLayer.FeatureClass.ShapeType == esriGeometryType.esriGeometryPolyline)
                     {
                         this.comboBox4.Items.Add(strLayerName);//添加线图层
+                        this.comboBox7.Items.Add(strLayerName);
+                    }
+                    if (pFeatureLayer.FeatureClass.ShapeType == esriGeometryType.esriGeometryPoint)
+                    {
+                        this.comboBox1.Items.Add(strLayerName);
+                        this.comboBox6.Items.Add(strLayerName);
                     }
                 }
             }
@@ -217,6 +222,14 @@ namespace PrDispalce.FlowMap
             if (this.comboBox4.Items.Count > 0)
             {
                 this.comboBox4.SelectedIndex = 0;
+            }
+            if (this.comboBox6.Items.Count > 0)
+            {
+                this.comboBox6.SelectedIndex = 0;
+            }
+            if (this.comboBox7.Items.Count > 0)
+            {
+                this.comboBox7.SelectedIndex = 0;
             }
             #endregion
 
@@ -3836,7 +3849,8 @@ namespace PrDispalce.FlowMap
             Dictionary<Tuple<int, int>, double> pWeighGrids = Fs.GetWeighGrid(Grids, GridWithNode, PointFlow, 4, 1);//确定整个Grids的权重(这里参数需要设置)
 
             ///加快搜索，提前将所有探索方向全部提前计算（实际上应该是需要时才计算，这里可能导致后续计算存在重叠问题，在计算过程中解决即可）【考虑数据类型】
-            Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPtDis(pWeighGrids, desGrids, GridType);//获取给定节点的方向探索路径
+            Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPtDis(GridWithNode,pWeighGrids, desGrids, GridType,Grids,0);
+            //Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPtDis(pWeighGrids, desGrids, GridType);//获取给定节点的方向探索路径
             //Dictionary<Tuple<int, int>, double> DesDis = FMU.GetDisOrder(desGrids, sGrid);
             #endregion
 
@@ -5304,7 +5318,8 @@ namespace PrDispalce.FlowMap
             #region 路径的宽度需要重新计算
             for (int i = 0; i < PLList.Count; i++)
             {
-                double Width = FD.GetWidth(PLList[i], 20, 0.005, MaxVolume, MinVolume, 2);
+                //double Width = FD.GetWidth(PLList[i], 20, 0.005, MaxVolume, MinVolume, 2);//USA 数据
+                double Width = FD.GetWidth(PLList[i], 20, 0.005, MaxVolume, MinVolume, 2);//欧洲数据
                 PLList[i].SylWidth = Width;
             }
             #endregion
@@ -5321,7 +5336,8 @@ namespace PrDispalce.FlowMap
             ///平滑考虑投影和比例尺的核心过程：1. 若投影不一致，需要进行投影变换，即变换到指定投影下；2. 考虑制图宽度偏移时需要依据比例尺转换为实地距离进行偏移！！
             #region 平滑过程
             FlowDraw FD2 = new FlowDraw(pMapControl, OutFilePath);
-            FD2.LayoutSmoothMap_2(PLList, 0.01, true, true, 0.1, 0.5, 10000, 1, 3);//备注：计算Smooth Index时为了获取和Sun可对照的结果，这里200需修改为5【采样相同】；
+            //FD2.LayoutSmoothMap_2(PLList, 0.01, true, true, 0.1, 0.5, 10000, 1, 200);//USA data//备注：（1）这里的10000设置需要依据格网密度来，这里为了方便设置一个确定值；（2）计算Smooth Index时为了获取和Sun可对照的结果，这里200需修改为5【采样相同】；
+            FD2.LayoutSmoothMap_2(PLList, 0.01, true, true, 0.1, 0.5, 0.2, 1, 3);//欧洲数据
             #endregion
         }
 
@@ -5358,7 +5374,7 @@ namespace PrDispalce.FlowMap
             //GridXY[0] = 0.8; GridXY[1] = 0.8;
             GridXY = Fs.GetXY(AllPoints, 2, 0.05);
             double[] ExtendValue = FMU.GetExtend(pFeatureLayer);
-            //List<IFeatureLayer> LayerList = new List<IFeatureLayer>();
+            
             //LayerList.Add(CacheLayer);
             //List<Tuple<IGeometry, esriGeometryType>> Features = FMU.GetFeatures(LayerList);
             //Dictionary<Tuple<int, int>, List<double>> Grids = Fs.GetGridConObstacle(ExtendValue, GridXY, Features, ref colNum, ref rowNum, 0);//构建格网
@@ -5371,7 +5387,7 @@ namespace PrDispalce.FlowMap
             //IFeatureLayer CacheLayer = pFeatureHandle.GetLayer(pMap, this.comboBox3.Text);//阻隔图层
             //List<IFeatureLayer> LayerList = new List<IFeatureLayer>();
             //LayerList.Add(CacheLayer);
-            //List<Tuple<IGeometry, esriGeometryType>> Features = FMU.GetFeatures(LayerList);
+            //List<Tuple<IGeometry, esriGeometryType>> Features = FMU.GetFeatures(LayerList, pMap.SpatialReference);
             //Dictionary<Tuple<int, int>, List<double>> Grids = Fs.GetGridConObstacle(ExtendValue, GridXY, Features, ref colNum, ref rowNum, 0);//构建格网
             #endregion
 
@@ -5428,9 +5444,9 @@ namespace PrDispalce.FlowMap
             //Dictionary<Tuple<int, int>, double> pWeighGrids = Fs.GetWeighGrid(Grids, GridWithNode, PointFlow, 8, 1);//确定整个Grids的权重(这里参数需要设置)
 
             ///加快搜索，提前将所有探索方向全部提前计算（实际上应该是需要时才计算，这里可能导致后续计算存在重叠问题，在计算过程中解决即可）
-            Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt(pWeighGrids, desGrids);//获取给定节点的方向探索路径
+            //Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt(pWeighGrids, desGrids);//获取给定节点的方向探索路径
             //Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt_2(pWeighGrids, desGrids, 1);//获取给定节点的方向探索路径【该阶段已考虑避免重叠约束】
-            //Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt_3(GridWithNode, pWeighGrids, desGrids, Grids, 0);
+            Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt_3(GridWithNode, pWeighGrids, desGrids, Grids, 0);
             //Dictionary<Tuple<int, int>, double> DesDis = FMU.GetDisOrder(desGrids, sGrid);
             #endregion
 
@@ -5449,6 +5465,7 @@ namespace PrDispalce.FlowMap
                     double MinLength = 100000;
                     List<Tuple<int, int>> TargetPath = null;
                     int Label = 0;//标识终点到起点最短距离的节是否是起点（=1表示终点是起点）
+                    int AngleLabel = 0;//标识最终选用的路径是否非钝角流入（0钝角流入；1非钝角流入）
 
                     #region 需要判断该节点是否被已构建的路径覆盖(已覆盖)
                     if (FMU.IntersectGrid(desGrids[i], cFM.PathGrids))
@@ -5527,7 +5544,7 @@ namespace PrDispalce.FlowMap
                                 #region 存在重叠
                                 else if (FMU.IntersectPathInt(CacheShortPath, cFM.PathGrids) == 1 || OverlayLabel)
                                 {
-                                    //if (MinDis < Math.Sqrt(1.9) && (CacheShortPathLength + cFM.GridForPaths[cFM.PathGrids[j]].Length * 0.65) > MaxDis)///如果长度小于该值才需要判断；否则无须判断
+                                    //if (MinDis < Math.Sqrt(1.9) && (CacheShortPathLength + cFM.GridForPaths[cFM.PathGrids[j]].Length * 0.45) > MaxDis)///如果长度小于该值才需要判断；否则无须判断
                                     //if (MinDis < Math.Sqrt(1.9))
                                     //if (MinDis < 2.9)
                                     //{
@@ -5536,7 +5553,7 @@ namespace PrDispalce.FlowMap
                                     FMU.FlowCrosssingContraint(WeighGrids, 0, desGrids[i], cFM.PathGrids[j], cFM.PathGrids);//Cross约束
                                     //FMU.FlowOverLayContraint_2(desGrids, WeighGrids, 1, desGrids[i]);//Overlay约束
                                     //FMU.FlowOverLayContraint_2Tar(desGrids, WeighGrids, 0, desGrids[i]);
-                                    //FMU.FlowOverLayContraint_3Tar(desGrids, GridWithNode, WeighGrids, 0, desGrids[i], Grids, true);
+                                    FMU.FlowOverLayContraint_3Tar(desGrids, GridWithNode, WeighGrids, 0, desGrids[i], Grids, true);//0就是1阶；0阶时该段代码注释掉即可
 
                                     PathTrace Pt = new PathTrace();
                                     List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
@@ -5549,10 +5566,10 @@ namespace PrDispalce.FlowMap
                                         CacheShortPathLength = FMU.GetPathLength(CacheShortPath);
 
                                         #region 判段交叉或重合
-                                        //if (FMU.IntersectPathInt(CacheShortPath, cFM.PathGrids) == 2 || FMU.IntersectPath(CacheShortPath, CopydesGrids))
-                                        //{
-                                        //    CacheShortPathLength = 1000000 + CacheShortPathLength;//交叉惩罚系数更高
-                                        //}
+                                        if (FMU.IntersectPathInt(CacheShortPath, cFM.PathGrids) == 2 || FMU.IntersectPath(CacheShortPath, CopydesGrids))
+                                        {
+                                            CacheShortPathLength = 1000000 + CacheShortPathLength;//交叉惩罚系数更高
+                                        }
                                         #endregion
                                     }
                                     else
@@ -5628,6 +5645,15 @@ namespace PrDispalce.FlowMap
                                 pCachePath.AddRange(CacheShortPath);
                                 TargetPath = pCachePath;
 
+                                //if (FMU.AngleContraint(TargetPath, cFM.GridForPaths[cFM.PathGrids[j]], Grids))
+                                //{
+                                //    AngleLabel = 1;//非钝角流入
+                                //}
+                                //else
+                                //{
+                                //    AngleLabel = 0;//钝角流入
+                                //}
+
                                 //TestTargetPath = CacheShortPath;//测试用
                                 //TestShort = CacheShortPathLength;//测试用
                             }
@@ -5639,10 +5665,476 @@ namespace PrDispalce.FlowMap
                     #endregion
 
                     #region 表示起点优先限制
-                    if (Label == 1)
+                    //if (Label == 1)
+                    //{
+                    //    MinLength = MinLength + 10000;
+                    //}
+                    #endregion
+
+                    #region 添加角度约束【特殊情况-一般不需要考虑该情况】
+                    //if (AngleLabel==1)
+                    //{
+                    //    MinLength = MinLength - 10000;
+                    //}
+                    #endregion
+
+                    #region 获取到起点路径最长终点的路径
+                    if (TargetPath == null)//可能存在路径为空的情况
                     {
-                        MinLength = MinLength + 10000;
+                        MinLength = 0;
                     }
+
+                    if (MinLength > MaxDis)
+                    {
+                        MaxDis = MinLength;
+                        CachePath = new Path(sGrid, desGrids[i], TargetPath);
+
+                        //double Test = FMU.GetPathLength(TestTargetPath);//测试用
+                        //int TesTloc = 0;
+                    }
+                    #endregion
+                }
+
+                #region 可视化显示（表示Path的生成过程）
+                FlowDraw FD1 = new FlowDraw(pMapControl, Grids);
+                FD1.FlowPathDraw(CachePath, 1, 0);
+                #endregion
+
+                #region 防止可能出现空的情况
+                //cFM.PathRefresh(CachePath, 1);
+                if (CachePath != null)
+                {
+                    cFM.PathRefresh(CachePath, 1, PointFlow[GridWithNode[CachePath.endPoint]]);//更新：包括子路径与流量更新
+                    desGrids.Remove(CachePath.endPoint);//移除一个Destination
+                    //DesDis.Remove(CachePath.endPoint);
+                }
+
+                else
+                {
+                    desGrids.RemoveAt(0);
+                }
+                #endregion
+            }
+            #endregion
+
+            #region 可视化和输出(TVCG修改前)
+            FlowDraw FD2 = new FlowDraw(pMapControl, Grids, AllPoints, NodeInGrid, GridWithNode, OutFilePath);
+            //FD2.SmoothFlowMap(cFM.SubPaths, 2, 2000, 20, 1, 1, 1, 0, 200);
+            //FD2.FlowMapDraw(cFM.SubPaths, 15, 2000, 20, 1, 1, 1);
+            //FD2.FlowMapDraw(cFM.SubPaths, 15, 2000, 20, 1, 0, 1);
+            #endregion
+
+            #region 可视化和输出(8.22 TVCG修改)
+            //FlowDraw FD2 = new FlowDraw(pMapControl, Grids, AllPoints, NodeInGrid, GridWithNode, OutFilePath);
+            //FD2.SmoothFlowMap_2(cFM.SubPaths, 4, 0.05, 2000, MinFlow, 2, 1, 0.4, 0.1 * GridXY[0], 1, 200, 0, 0.001, true, true, 0);//三类边控制点的偏移距离为格网长度的0.1
+            FD2.FlowMapDraw(cFM.SubPaths, 2, 0.05, 2000, 20, 1, 1, 1);//Grid Connect Layout
+            FD2.FlowMapDraw(cFM.SubPaths, 2, 0.05, 2000, 20, 1, 0, 1);//Point Connect Layout
+            #endregion
+        }
+
+        /// <summary>
+        /// 计算每个des点到邻近边的最小距离！
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button31_Click(object sender, EventArgs e)
+        {
+            IFeatureLayer PointFeatureLayer = pFeatureHandle.GetLayer(pMap, this.comboBox6.Text);//点图层
+            IFeatureClass PointFeatureClass = PointFeatureLayer.FeatureClass;
+
+            IFeatureLayer FlowPathFeatureLayer = pFeatureHandle.GetLayer(pMap, this.comboBox7.Text);//线图层
+            IFeatureClass FlowPathFeatureClass = FlowPathFeatureLayer.FeatureClass;
+
+            List<double> DisList = new List<double>();
+            for (int i = 0; i < PointFeatureClass.FeatureCount(null); i++) //计算最短距离(返回倒数第二小的，因为每一个路径都会连接一个节点！)
+            {
+                IGeometry PointGeo = PointFeatureClass.GetFeature(i).Shape as IGeometry;
+                PointGeo.Project(pMap.SpatialReference);
+                IProximityOperator IPO = PointGeo as IProximityOperator;
+                List<double> CacheDisList = new List<double>();
+                for (int j = 0; j < FlowPathFeatureClass.FeatureCount(null); j++)
+                {
+                    IGeometry FlowPathGeo = FlowPathFeatureClass.GetFeature(j).Shape as IGeometry;
+                    FlowPathGeo.Project(pMap.SpatialReference);
+                    if (FlowPathGeo != null)
+                    {
+                        double MinDis = IPO.ReturnDistance(FlowPathGeo);
+                        CacheDisList.Add(MinDis);
+                    }
+                }
+
+                if (CacheDisList.Count > 2)
+                {
+                    CacheDisList.Remove(CacheDisList.Min());
+                    DisList.Add(CacheDisList.Min());//获得倒数第二小的
+                }
+                else if (CacheDisList.Count == 1)
+                {
+                    DisList.Add(CacheDisList[0]);
+                }
+                else
+                {
+                    DisList.Add(0);
+                }
+            }
+
+            for (int i = 0; i < DisList.Count; i++)
+            {
+                Console.WriteLine(DisList[i]);
+            }
+        }
+
+        /// <summary>
+        /// 异质空间
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button32_Click(object sender, EventArgs e)
+        {
+            #region OutPutCheck
+            if (OutFilePath == null)
+            {
+                MessageBox.Show("Please give the OutPut path");
+                return;
+            }
+            #endregion
+
+            #region OD参数
+            IFeatureLayer pFeatureLayer = pFeatureHandle.GetLayer(pMap, this.comboBox1.Text);
+            //IFeatureLayer CacheLayer = pFeatureHandle.GetLayer(pMap, this.comboBox3.Text);
+            IFeatureClass pFeatureClass = pFeatureLayer.FeatureClass;
+
+            IPoint OriginPoint = new PointClass();
+            List<IPoint> DesPoints = new List<IPoint>();
+            List<IPoint> AllPoints = new List<IPoint>();
+            Dictionary<IPoint, double> PointFlow = new Dictionary<IPoint, double>();
+            FMU.GetOD(pFeatureClass, OriginPoint, DesPoints, AllPoints, PointFlow, pMap.SpatialReference);
+            List<double> AllFlows = PointFlow.Values.ToList();
+            AllFlows.Remove(0);//起点无流量，需要删除
+            double MinFlow = AllFlows.Min(); double MaxFlow = AllFlows.Max();//最大流量和最小流量
+            double SumFlow = AllFlows.Sum();//总流量
+            #endregion
+
+            #region 获取Grids和节点编码
+            int rowNum = 0; int colNum = 0;
+            double[] GridXY = new double[2];
+            //GridXY[0] = 0.8; GridXY[1] = 0.8;
+            GridXY = Fs.GetXY(AllPoints, 2, 0.05);
+            double[] ExtendValue = FMU.GetExtend(pFeatureLayer);
+            #endregion
+
+            //LayerList.Add(CacheLayer);
+            //List<Tuple<IGeometry, esriGeometryType>> Features = FMU.GetFeatures(LayerList);
+            //Dictionary<Tuple<int, int>, List<double>> Grids = Fs.GetGridConObstacle(ExtendValue, GridXY, Features, ref colNum, ref rowNum, 0);//构建格网
+
+            #region 异质图层
+            IFeatureLayer CacheLayer = pFeatureHandle.GetLayer(pMap, this.comboBox3.Text);
+            List<IFeatureLayer> LayerList = new List<IFeatureLayer>();
+            LayerList.Add(CacheLayer);
+            List<Tuple<IGeometry, esriGeometryType>> Features = FMU.GetFeatures(LayerList, pMap.SpatialReference);
+            #endregion
+
+            #region 正常格网构建（并依据要素对格网类型进行划分）        
+            Dictionary<Tuple<int, int>, List<double>> Grids = Fs.GetGrid(ExtendValue, GridXY, ref colNum, ref rowNum);//构建格网 
+            Dictionary<Tuple<int, int>, int> GridType = Fs.GetGridType(Grids, Features, 0.8);
+            Dictionary<IPoint, Tuple<int, int>> NodeInGrid = Fs.GetNodeInGrid(Grids, AllPoints);//获取点对应的格网
+            Dictionary<Tuple<int, int>, IPoint> GridWithNode = Fs.GetGridContainNodes(Grids, AllPoints);//获取格网中的点（每个格网最多对应一个点）
+            #endregion
+
+            #region 网格绘制（可有可无）
+            object PolygonSymbol = Sb.PolygonSymbolization(0.4, 153, 153, 153, 0, 0, 20, 20);
+            foreach (KeyValuePair<Tuple<int, int>, List<double>> Kv in Grids)
+            {
+                List<TriNode> NodeList = new List<TriNode>();
+
+                TriNode Node1 = new TriNode();
+                Node1.X = Kv.Value[0];
+                Node1.Y = Kv.Value[1];
+
+                TriNode Node2 = new TriNode();
+                Node2.X = Kv.Value[2];
+                Node2.Y = Kv.Value[1];
+
+                TriNode Node3 = new TriNode();
+                Node3.X = Kv.Value[2];
+                Node3.Y = Kv.Value[3];
+
+                TriNode Node4 = new TriNode();
+                Node4.X = Kv.Value[0];
+                Node4.Y = Kv.Value[3];
+
+                NodeList.Add(Node1); NodeList.Add(Node2); NodeList.Add(Node3); NodeList.Add(Node4);
+
+                TriNode MidNode = new TriNode();
+                MidNode.X = (Kv.Value[0] + Kv.Value[2]) / 2;
+                MidNode.Y = (Kv.Value[1] + Kv.Value[3]) / 2;
+                PointObject CachePoint = new PointObject(0, MidNode);
+
+                PolygonObject CachePo = new PolygonObject(0, NodeList);
+                IPolygon pPolygon = this.PolygonObjectConvert(CachePo);
+                pMapControl.DrawShape(pPolygon, ref PolygonSymbol);
+            }
+            #endregion
+
+            #region 初始化
+            Tuple<int, int> sGrid = NodeInGrid[OriginPoint];//起点格网编码
+            List<Tuple<int, int>> desGrids = new List<Tuple<int, int>>();//终点格网编码
+            for (int i = 0; i < DesPoints.Count; i++)
+            {
+                desGrids.Add(NodeInGrid[DesPoints[i]]);
+            }
+
+            cFlowMap cFM = new cFlowMap(sGrid, desGrids, PointFlow);
+            //Dictionary<Tuple<int, int>, double> pWeighGrids = Fs.GetWeighGrid(Grids, GridWithNode, PointFlow, 4, 3);
+            Dictionary<Tuple<int, int>, double> pWeighGrids = Fs.GetWeighGrid(Grids, GridWithNode, PointFlow, 3, 1);//确定整个Grids的权重(这里参数需要设置)
+            //Dictionary<Tuple<int, int>, double> pWeighGrids = Fs.GetWeighGrid(Grids, GridWithNode, PointFlow, 7, 1);//确定整个Grids的权重(这里参数需要设置)
+
+            ///加快搜索，提前将所有探索方向全部提前计算（实际上应该是需要时才计算，这里可能导致后续计算存在重叠问题，在计算过程中解决即可）
+            //Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt(pWeighGrids, desGrids);//获取给定节点的方向探索路径
+            //Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt_2(pWeighGrids, desGrids, 1);//获取给定节点的方向探索路径【该阶段已考虑避免重叠约束】
+            //Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPt_3(GridWithNode, pWeighGrids, desGrids, Grids, 0);
+            Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> DesDirPt = FMU.GetDesDirPtDis(GridWithNode,pWeighGrids, desGrids, GridType,Grids,0);
+            //Dictionary<Tuple<int, int>, double> DesDis = FMU.GetDisOrder(desGrids, sGrid);
+            #endregion
+
+            #region 遍历构成Flow过程
+            double CountLabel = 0;//进程监控
+            while (desGrids.Count > 0)
+            {
+                CountLabel++; Console.WriteLine(CountLabel);//进程监控
+                double MaxDis = 0;
+                Path CachePath = null;
+                //List<Tuple<int, int>> TestTargetPath = null;//测试用
+                //double TestShort = 0;//测试用
+
+                for (int i = 0; i < desGrids.Count; i++)
+                {
+                    double MinLength = 100000;
+                    List<Tuple<int, int>> TargetPath = null;
+                    int Label = 0;//标识终点到起点最短距离的节是否是起点（=1表示终点是起点）
+                    int AngleLabel = 0;//标识最终选用的路径是否非钝角流入（0钝角流入；1非钝角流入）
+                    int tConstrainLabel = 0;//考虑违反约束后边较大的情况
+
+                    #region 需要判断该节点是否被已构建的路径覆盖(已覆盖)
+                    if (FMU.IntersectGrid(desGrids[i], cFM.PathGrids))
+                    {
+                        TargetPath = new List<Tuple<int, int>>();
+                        TargetPath.Add(desGrids[i]);
+                    }
+                    #endregion
+
+                    #region 无覆盖
+                    else
+                    {
+                        //每次更新网格权重
+                        Console.Write(i);
+                        double MinDis = FMU.GetMinDis(desGrids[i], cFM.PathGrids);
+                        //List<double> DisList = DesDis.Values.ToList(); DisList.Sort();//升序排列
+                        //double Order = DisList.IndexOf(DesDis[desGrids[i]]) / DisList.Count;
+
+                        #region 获取到PathGrid的路径
+                        Dictionary<int, PathTrace> DirPt = DesDirPt[desGrids[i]];
+                        for (int j = 0; j < cFM.PathGrids.Count; j++)
+                        {
+                            int ConstrainLabel = 0;//考虑违反约束后边较大的情况
+
+                            #region 获取终点到已有路径中某点的最短路径
+
+                            #region 不考虑方向限制
+                            //List<int> DirList = new List<int>();
+
+                            //DirList.Add(1);
+                            //DirList.Add(2);
+                            //DirList.Add(3);
+                            //DirList.Add(4);
+                            //DirList.Add(5);
+                            //DirList.Add(6);
+                            //DirList.Add(7);
+                            //DirList.Add(8);
+                            #endregion
+
+                            List<int> DirList = FMU.GetConDirR(cFM.PathGrids[j], desGrids[i]);//获取限制性约束的方向                   
+                            int DirID = FMU.GetNumber(DirList);
+
+                            #region 可能存在重合点的情况
+                            if (DirID == 0)
+                            {
+                                break;
+                            }
+                            #endregion
+
+                            List<Tuple<int, int>> CacheShortPath = DirPt[DirID].GetShortestPath(cFM.PathGrids[j], desGrids[i]);
+                            #endregion
+
+                            #region 需要考虑可能不存在路径的情况
+                            double CacheShortPathLength = 0;
+                            if (CacheShortPath != null)
+                            {
+                                CacheShortPathLength = FMU.GetPathLength(CacheShortPath);
+                            }
+                            else
+                            {
+                                CacheShortPathLength = 10000000;
+                            }
+                            #endregion
+
+                            #region 添加交叉约束
+                            if (CacheShortPath != null)
+                            {
+                                List<Tuple<int, int>> CopydesGrids = Clone((object)desGrids) as List<Tuple<int, int>>;
+                                bool OverlayLabel = FMU.IntersectPath(CacheShortPath, CopydesGrids);//判断是否重叠
+
+                                #region 存在交叉
+                                if (FMU.IntersectPathInt(CacheShortPath, cFM.PathGrids) == 2)//这里的相交修改了
+                                {
+                                    CacheShortPathLength = 1000000 + CacheShortPathLength;//交叉惩罚系数更高
+                                    ConstrainLabel = 1;//考虑违反约束后边较大的情况
+                                }
+                                #endregion
+
+                                #region 存在重叠
+                                else if (FMU.IntersectPathInt(CacheShortPath, cFM.PathGrids) == 1 || OverlayLabel)
+                                {
+                                    //if (MinDis < Math.Sqrt(1.9) && (CacheShortPathLength + cFM.GridForPaths[cFM.PathGrids[j]].Length * 0.45) > MaxDis)///如果长度小于该值才需要判断；否则无须判断
+                                    //if (MinDis < Math.Sqrt(1.9))
+                                    //if (MinDis < 2.9)
+                                    //{
+                                    #region 考虑到搜索方向固定可能导致的重合
+                                    Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
+                                    FMU.FlowCrosssingContraint(WeighGrids, 0, desGrids[i], cFM.PathGrids[j], cFM.PathGrids);//Cross约束
+                                    //FMU.FlowOverLayContraint_2(desGrids, WeighGrids, 1, desGrids[i]);//Overlay约束
+                                    //FMU.FlowOverLayContraint_2Tar(desGrids, WeighGrids, 0, desGrids[i]);
+                                    FMU.FlowOverLayContraint_3Tar(desGrids, GridWithNode, WeighGrids, 0, desGrids[i], Grids, true);//0就是1阶；0阶时该段代码注释掉即可
+
+                                    PathTrace Pt = new PathTrace();
+                                    List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
+                                    JudgeList.Add(desGrids[i]);//添加搜索的起点
+                                    //考虑数据类型
+                                    Pt.MazeAlgDis(JudgeList, WeighGrids, 1, DirList, GridType);//备注：每次更新以后,WeightGrid会清零（这里需要考虑数据类型）
+                                    CacheShortPath = Pt.GetShortestPath(cFM.PathGrids[j], desGrids[i]);
+
+                                    if (CacheShortPath != null)
+                                    {
+                                        CacheShortPathLength = FMU.GetPathLength(CacheShortPath);
+
+                                        #region 判段交叉或重合
+                                        if (FMU.IntersectPathInt(CacheShortPath, cFM.PathGrids) == 2 || FMU.IntersectPath(CacheShortPath, CopydesGrids))
+                                        {
+                                            CacheShortPathLength = 1000000 + CacheShortPathLength;//交叉惩罚系数更高
+                                            ConstrainLabel = 1;//考虑违反约束后边较大的情况
+                                        }
+                                        #endregion
+                                    }
+                                    else
+                                    {
+                                        CacheShortPathLength = 10000000;
+                                    }
+                                    #endregion
+                                    //}
+
+                                    //否则，加上一个极大值
+                                    //else
+                                    //{
+                                    //    CacheShortPathLength = 100000 + CacheShortPathLength;
+                                    //}
+                                }
+                                #endregion
+
+                                //if (FMU.IntersectPath(CacheShortPath, cFM.PathGrids))
+                                //{
+                                //    CacheShortPathLength = 100000 + CacheShortPathLength;
+                                //}
+
+                                //if (FMU.LineIntersectPath(CacheShortPath, cFM.PathGrids, Grids))
+                                //{
+                                //    CacheShortPathLength = 1000000 + CacheShortPathLength;
+                                //}
+
+                                //if (FMU.obstacleIntersectPath(CacheShortPath, Features, Grids))
+                                //{
+                                //    CacheShortPathLength = 1000000 + CacheShortPathLength;
+                                //}
+
+                            }
+                            #endregion
+
+                            #region 添加角度约束限制
+                            if (CacheShortPath != null)
+                            {
+                                if (FMU.AngleContraint(CacheShortPath, cFM.GridForPaths[cFM.PathGrids[j]], Grids))
+                                {
+                                    CacheShortPathLength = 15 + CacheShortPathLength;
+                                    ConstrainLabel = 1;//考虑违反约束后边较大的情况
+                                }
+                            }
+                            #endregion
+
+                            #region 添加长度约束
+                            //if (CacheShortPathLength < Math.Sqrt(1.9))
+                            //if (CacheShortPathLength < 2.9)
+                            //{
+                            //CacheShortPathLength = 15 + CacheShortPathLength;
+                            //}
+                            #endregion
+
+                            double TotalLength = 0;
+                            TotalLength = CacheShortPathLength + cFM.GridForPaths[cFM.PathGrids[j]].Length * 0.65;
+                            #region 比较获取某给定节点到起点的最短路径
+                            if (TotalLength < MinLength)
+                            {
+                                if (cFM.GridForPaths[cFM.PathGrids[j]].Length == 0 && !cFM.PathGrids.Contains(CacheShortPath[1]))//消除某些点到起点的最短路径是经过已有路径的情况
+                                {
+                                    Label = 1;//标识最短路径终点是起点
+                                }
+
+                                else
+                                {
+                                    Label = 0;//标识最短路径终点非起点
+                                }
+
+                                tConstrainLabel = ConstrainLabel;//考虑违反约束后边较大的情况
+                                MinLength = TotalLength;
+                                List<Tuple<int, int>> pCachePath = cFM.GridForPaths[cFM.PathGrids[j]].ePath.ToList();
+                                CacheShortPath.RemoveAt(0);//移除第一个要素，避免存在重复元素
+
+                                pCachePath.AddRange(CacheShortPath);
+                                TargetPath = pCachePath;
+
+                                //if (FMU.AngleContraint(TargetPath, cFM.GridForPaths[cFM.PathGrids[j]], Grids))
+                                //{
+                                //    AngleLabel = 1;//非钝角流入
+                                //}
+                                //else
+                                //{
+                                //    AngleLabel = 0;//钝角流入
+                                //}
+
+                                //TestTargetPath = CacheShortPath;//测试用
+                                //TestShort = CacheShortPathLength;//测试用
+                            }
+                            #endregion
+                        }
+                        #endregion
+                    }
+                    //}
+                    #endregion
+
+                    #region 表示起点优先限制
+                    //if (Label == 1)
+                    //{
+                    //    MinLength = MinLength + 10000;
+                    //}
+                    if (tConstrainLabel == 1)//考虑违反约束后边较大的情况
+                    {
+                        MinLength = MinLength - 40;
+                    }
+                    #endregion
+
+                    #region 添加角度约束【特殊情况-一般不需要考虑该情况】
+                    //if (AngleLabel==1)
+                    //{
+                    //    MinLength = MinLength - 10000;
+                    //}
                     #endregion
 
                     #region 获取到起点路径最长终点的路径

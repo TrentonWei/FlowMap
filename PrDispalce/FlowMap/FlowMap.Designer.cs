@@ -63,6 +63,7 @@
             this.button27 = new System.Windows.Forms.Button();
             this.button25 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button32 = new System.Windows.Forms.Button();
             this.button30 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -75,15 +76,19 @@
             this.label9 = new System.Windows.Forms.Label();
             this.comboBox4 = new System.Windows.Forms.ComboBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.button31 = new System.Windows.Forms.Button();
+            this.comboBox7 = new System.Windows.Forms.ComboBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.comboBox6 = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -457,23 +462,34 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.button32);
             this.groupBox2.Controls.Add(this.button30);
             this.groupBox2.Controls.Add(this.button2);
             this.groupBox2.Controls.Add(this.button21);
             this.groupBox2.Location = new System.Drawing.Point(12, 98);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(450, 146);
+            this.groupBox2.Size = new System.Drawing.Size(473, 146);
             this.groupBox2.TabIndex = 33;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "User use without node shift（Geoprj won\'t influence）";
+            // 
+            // button32
+            // 
+            this.button32.Location = new System.Drawing.Point(6, 117);
+            this.button32.Name = "button32";
+            this.button32.Size = new System.Drawing.Size(453, 23);
+            this.button32.TabIndex = 31;
+            this.button32.Text = "US Data Layout generation(Not Node shift) V3.0 异质空间";
+            this.button32.UseVisualStyleBackColor = true;
+            this.button32.Click += new System.EventHandler(this.button32_Click);
             // 
             // button30
             // 
             this.button30.Location = new System.Drawing.Point(7, 87);
             this.button30.Name = "button30";
-            this.button30.Size = new System.Drawing.Size(402, 23);
+            this.button30.Size = new System.Drawing.Size(452, 23);
             this.button30.TabIndex = 30;
-            this.button30.Text = "US Data Layout generation(Not Node shift) V2.0";
+            this.button30.Text = "US Data Layout generation(Not Node shift) V2.0 优化后";
             this.button30.UseVisualStyleBackColor = true;
             this.button30.Click += new System.EventHandler(this.button30_Click);
             // 
@@ -481,7 +497,7 @@
             // 
             this.button2.Location = new System.Drawing.Point(6, 57);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(403, 23);
+            this.button2.Size = new System.Drawing.Size(453, 23);
             this.button2.TabIndex = 29;
             this.button2.Text = "US Data Layout generation(Not Node shift) V1.0";
             this.button2.UseVisualStyleBackColor = true;
@@ -498,9 +514,6 @@
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.comboBox4);
             this.groupBox3.Controls.Add(this.label8);
-            this.groupBox3.Controls.Add(this.label7);
-            this.groupBox3.Controls.Add(this.textBox2);
-            this.groupBox3.Controls.Add(this.label6);
             this.groupBox3.Controls.Add(this.textBox1);
             this.groupBox3.Controls.Add(this.label5);
             this.groupBox3.Controls.Add(this.label4);
@@ -513,7 +526,7 @@
             // 
             // button29
             // 
-            this.button29.Location = new System.Drawing.Point(10, 245);
+            this.button29.Location = new System.Drawing.Point(8, 211);
             this.button29.Name = "button29";
             this.button29.Size = new System.Drawing.Size(377, 23);
             this.button29.TabIndex = 14;
@@ -533,7 +546,7 @@
             // 
             // button28
             // 
-            this.button28.Location = new System.Drawing.Point(10, 215);
+            this.button28.Location = new System.Drawing.Point(8, 181);
             this.button28.Name = "button28";
             this.button28.Size = new System.Drawing.Size(377, 23);
             this.button28.TabIndex = 12;
@@ -543,7 +556,7 @@
             // 
             // button26
             // 
-            this.button26.Location = new System.Drawing.Point(10, 185);
+            this.button26.Location = new System.Drawing.Point(8, 151);
             this.button26.Name = "button26";
             this.button26.Size = new System.Drawing.Size(377, 23);
             this.button26.TabIndex = 11;
@@ -554,7 +567,7 @@
             // button3
             // 
             this.button3.Image = ((System.Drawing.Image)(resources.GetObject("button3.Image")));
-            this.button3.Location = new System.Drawing.Point(287, 154);
+            this.button3.Location = new System.Drawing.Point(285, 120);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(37, 23);
             this.button3.TabIndex = 10;
@@ -564,7 +577,7 @@
             // comboBox5
             // 
             this.comboBox5.FormattingEnabled = true;
-            this.comboBox5.Location = new System.Drawing.Point(115, 154);
+            this.comboBox5.Location = new System.Drawing.Point(113, 120);
             this.comboBox5.Name = "comboBox5";
             this.comboBox5.Size = new System.Drawing.Size(209, 23);
             this.comboBox5.TabIndex = 9;
@@ -572,7 +585,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(43, 154);
+            this.label9.Location = new System.Drawing.Point(41, 120);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(55, 15);
             this.label9.TabIndex = 8;
@@ -581,7 +594,7 @@
             // comboBox4
             // 
             this.comboBox4.FormattingEnabled = true;
-            this.comboBox4.Location = new System.Drawing.Point(115, 121);
+            this.comboBox4.Location = new System.Drawing.Point(113, 87);
             this.comboBox4.Name = "comboBox4";
             this.comboBox4.Size = new System.Drawing.Size(209, 23);
             this.comboBox4.TabIndex = 7;
@@ -589,37 +602,11 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(7, 121);
+            this.label8.Location = new System.Drawing.Point(5, 87);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(103, 15);
             this.label8.TabIndex = 6;
             this.label8.Text = "Layout Layer";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(169, 87);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(23, 15);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "mm";
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(90, 82);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(73, 25);
-            this.textBox2.TabIndex = 4;
-            this.textBox2.Text = "40";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(14, 87);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 15);
-            this.label6.TabIndex = 3;
-            this.label6.Text = "MaxWidth";
             // 
             // textBox1
             // 
@@ -647,11 +634,70 @@
             this.label4.TabIndex = 0;
             this.label4.Text = "Scale for visualization ";
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.button31);
+            this.groupBox4.Controls.Add(this.comboBox7);
+            this.groupBox4.Controls.Add(this.label11);
+            this.groupBox4.Controls.Add(this.comboBox6);
+            this.groupBox4.Controls.Add(this.label10);
+            this.groupBox4.Location = new System.Drawing.Point(506, 377);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(354, 131);
+            this.groupBox4.TabIndex = 35;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Evaluation metric";
+            // 
+            // button31
+            // 
+            this.button31.Location = new System.Drawing.Point(283, 86);
+            this.button31.Name = "button31";
+            this.button31.Size = new System.Drawing.Size(65, 35);
+            this.button31.TabIndex = 4;
+            this.button31.Text = "MinDis";
+            this.button31.UseVisualStyleBackColor = true;
+            this.button31.Click += new System.EventHandler(this.button31_Click);
+            // 
+            // comboBox7
+            // 
+            this.comboBox7.FormattingEnabled = true;
+            this.comboBox7.Location = new System.Drawing.Point(144, 57);
+            this.comboBox7.Name = "comboBox7";
+            this.comboBox7.Size = new System.Drawing.Size(204, 23);
+            this.comboBox7.TabIndex = 3;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(16, 60);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(127, 15);
+            this.label11.TabIndex = 2;
+            this.label11.Text = "Flow path layer";
+            // 
+            // comboBox6
+            // 
+            this.comboBox6.FormattingEnabled = true;
+            this.comboBox6.Location = new System.Drawing.Point(144, 25);
+            this.comboBox6.Name = "comboBox6";
+            this.comboBox6.Size = new System.Drawing.Size(204, 23);
+            this.comboBox6.TabIndex = 1;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(43, 28);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(95, 15);
+            this.label10.TabIndex = 0;
+            this.label10.Text = "Point Layer";
+            // 
             // FlowMap
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1306, 586);
+            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -671,6 +717,8 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -717,8 +765,6 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ComboBox comboBox4;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
@@ -726,9 +772,15 @@
         private System.Windows.Forms.Button button26;
         private System.Windows.Forms.Button button27;
         private System.Windows.Forms.Button button28;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.Button button29;
         private System.Windows.Forms.Button button30;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Button button31;
+        private System.Windows.Forms.ComboBox comboBox7;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.ComboBox comboBox6;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button button32;
     }
 }
