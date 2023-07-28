@@ -1460,7 +1460,49 @@ namespace PrDispalce.FlowMap
             //bool Testloaction = (ePoint != sPoint);
             while ((ePoint.Item1 != sPoint.Item1) || (ePoint.Item2 != sPoint.Item2))//避免出现重复问题
             {
-                Tuple<int, int> TestePoint = this.GetFather(ePoint);
+                //Tuple<int, int> TestePoint = this.GetFather(ePoint);
+                //Tuple<int, int> TestePoint = this.GetFather2(ePoint);
+                //ePoint = this.GetFather(ePoint);
+                ePoint = this.GetFather2(ePoint);
+                if (ePoint != null)
+                {
+                    ShortestPath.Add(ePoint);
+                }
+
+                ///需要考虑可能不存在路径的情况
+                if (ePoint == null &&ShortestPath.Count==1)
+                {
+                    return null;
+                }
+                else if (ePoint==null || ePoint == sPoint)
+                {
+                    return ShortestPath;
+                }
+            }
+            #endregion
+
+            return ShortestPath;
+        }
+
+        /// <summary>
+        /// 获得起点到终点的最短路径[起点-终点网格编码]（起点指整个FlowMap的起点）【考虑了可能没有路径的情况，需要进行反向搜索】
+        /// </summary>
+        /// <param name="ePoint">起点</param>
+        /// <param name="sPoint">终点</param>
+        /// Type=1,表示不考虑起点与终点之间的方向关系
+        /// Type=2，表示路径搜索时，考虑了起点与终点之间的方向关系
+        /// <returns></returns>
+        public List<Tuple<int, int>> GetShortestPath2(List<Tuple<int, int>> NearGrids, List<Tuple<int, int>> OuterGrids, Tuple<int, int> ePoint, Tuple<int, int> sPoint)
+        {
+            List<Tuple<int, int>> ShortestPath = new List<Tuple<int, int>>();
+
+            #region 计算过程
+            ShortestPath.Add(ePoint);
+
+            //bool Testloaction = (ePoint != sPoint);
+            while ((ePoint.Item1 != sPoint.Item1) || (ePoint.Item2 != sPoint.Item2))//避免出现重复问题
+            {
+                //Tuple<int, int> TestePoint = this.GetFather(ePoint);
                 ePoint = this.GetFather(ePoint);
                 ShortestPath.Add(ePoint);
 
@@ -1612,10 +1654,30 @@ namespace PrDispalce.FlowMap
             {
                 if (kv.Value.Childs.Contains(endPoint))
                 {
-                    return kv.Key;
+                    return kv.Key;                   
                 }
             }
+           return null;
+        }
 
+        /// <summary>
+        /// 获取给定格网的上一路径；而且是返回第一个路径
+        /// </summary>
+        /// <param name="endPoint"></param>
+        /// <returns></returns>
+        public Tuple<int, int> GetFather2(Tuple<int, int> endPoint)
+        {
+            for (int i = endPoint.Item1 - 1; i <= endPoint.Item1 + 1; i++)
+            {
+                for (int j = endPoint.Item2 - 1; j <= endPoint.Item2 + 1; j++)
+                {
+                    Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+                    if (PathtraceRes.ContainsKey(CacheGrid) && PathtraceRes[CacheGrid].Childs.Contains(endPoint))
+                    {
+                        return CacheGrid;
+                    }
+                }
+            }
             return null;
         }
     }

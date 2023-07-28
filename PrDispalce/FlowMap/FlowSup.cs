@@ -270,6 +270,27 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
+        /// 针对制定范围构建索引
+        /// </summary>
+        /// <param name="ENVELOPE"></param> [MinX,MinY,MaxX,MaxY]【左下角往右上角编码】
+        /// <param name="gridXY"></param>[格网横向、纵向间隔]
+        /// <param name="colNum"></param>[输出列]
+        /// <param name="rowNum"></param>[输出行]
+        /// <returns>Tuple<int,int>=IJ;List<double>={MinX,MinY,MaxX,MaxY}</returns>
+        public Dictionary<Tuple<int, int>, List<Tuple<int, int>>> GetkOrderGrid(List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, IPoint> GridWithNode, List<Tuple<int, int>> Grids, Dictionary<Tuple<int, int>, List<double>> GridValue, int NearT, bool Specialk)
+        {
+            Dictionary<Tuple<int, int>, List<Tuple<int, int>>> kOrderGrids = new Dictionary<Tuple<int, int>, List<Tuple<int, int>>>();
+
+            foreach (Tuple<int, int> Grid in Grids)
+            {
+                List<Tuple<int, int>> kOrder = this.GetNearGrids_4(desGrids, Grid, GridWithNode, Grids, GridValue, NearT, Specialk);
+                kOrderGrids.Add(Grid, kOrder);
+            }
+
+            return kOrderGrids;
+        }
+
+        /// <summary>
         /// 计算获取不同区域的数据类型(只区分Land和非Land)
         /// </summary>
         /// <param name="?"></param>
@@ -933,6 +954,95 @@ namespace PrDispalce.FlowMap
                             NearT = NearT - 1;
                             Specialk = false;
                             NearGrids = this.GetNearGrids_3(desGrids, TargetGrid, StartGrid,GridWithNode, Grids,GridValue, NearT,Specialk);
+                        }
+                    }
+                }
+            }
+
+            #endregion
+
+            return NearGrids;
+        }
+
+        /// <summary>
+        /// 获取给定Grid的k阶邻近（邻近要素包含了自身）考虑重叠和节点间疏密的约束!!!
+        /// 这里对K=0做特殊处理，因为Point处于格网中时，往往可能不一定处于格网的中间
+        /// </summary>
+        /// desGrids=desPoint的格网</param>
+        /// <param name="TargetGrid">目标Grid</param>
+        /// Dictionary<Tuple<int, int>, IPoint> GridWithNode 表示Grid对应的节点
+        /// <param name="Grids">格网</param>
+        /// <param name="NearT">k阶邻近</param>
+        /// GridValue 表示格网的横纵坐标
+        /// GridwithNode表示格网包含点信息
+        /// <returns></returns>
+        public List<Tuple<int, int>> GetNearGrids_4(List<Tuple<int, int>> desGrids, Tuple<int, int> TargetGrid, Dictionary<Tuple<int, int>, IPoint> GridWithNode, List<Tuple<int, int>> Grids, Dictionary<Tuple<int, int>, List<double>> GridValue, int NearT, bool Specialk)
+        {
+            List<Tuple<int, int>> NearGrids = new List<Tuple<int, int>>();
+
+            #region NearT=-1
+            if (NearT == -1)
+            {
+                return null;
+            }
+            #endregion
+
+            #region NearT=0
+            else if (NearT == 0 && Specialk && desGrids.Contains(TargetGrid))
+            {
+                NearT = NearT + 1;
+                IPoint sPoint = new PointClass();
+                sPoint.X = GridWithNode[TargetGrid].X;
+                sPoint.Y = GridWithNode[TargetGrid].Y;
+
+                double XDis = Math.Abs(GridValue[TargetGrid][2] - GridValue[TargetGrid][0]);
+                double YDis = Math.Abs(GridValue[TargetGrid][3] - GridValue[TargetGrid][1]);
+
+                for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+                {
+                    for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+                    {
+                        Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+
+                        if (GridValue.ContainsKey(CacheGrid))
+                        {
+                            Tuple<double, double> DisXY = this.GetPointGridDis(sPoint, GridValue[CacheGrid]);
+
+                            if ((CacheGrid.Item1 != TargetGrid.Item1 && CacheGrid.Item2 != TargetGrid.Item2)&&desGrids.Contains(CacheGrid))//如果存在其它Grid在给定的Grid中，就只删除对应格点即可！！
+                            {
+                                NearGrids.Clear();
+                                NearGrids.Add(TargetGrid);
+                                return NearGrids;
+                            }
+
+                            if (DisXY.Item1 < 0.5 * XDis && DisXY.Item2 < 0.5 * YDis)
+                            {
+                                NearGrids.Add(CacheGrid);
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region NearT>0
+            else
+            {
+                for (int i = -NearT + TargetGrid.Item1; i < NearT + TargetGrid.Item1 + 1; i++)
+                {
+                    for (int j = -NearT + TargetGrid.Item2; j < NearT + TargetGrid.Item2 + 1; j++)
+                    {
+                        Tuple<int, int> CacheGrid = new Tuple<int, int>(i, j);
+                        if (Grids.Contains(CacheGrid))
+                        {
+                            NearGrids.Add(CacheGrid);
+                        }
+
+                        if (desGrids.Contains(CacheGrid) && CacheGrid.Item1 != TargetGrid.Item1 && CacheGrid.Item2 != TargetGrid.Item2)
+                        {
+                            NearT = NearT - 1;
+                            Specialk = false;
+                            NearGrids = this.GetNearGrids_4(desGrids, TargetGrid, GridWithNode, Grids, GridValue, NearT, Specialk);
                         }
                     }
                 }

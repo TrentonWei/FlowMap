@@ -725,6 +725,7 @@
             this.button33.TabIndex = 36;
             this.button33.Text = "效率优化 11.03";
             this.button33.UseVisualStyleBackColor = true;
+            this.button33.Click += new System.EventHandler(this.button33_Click);
             // 
             // FlowMap
             // 
