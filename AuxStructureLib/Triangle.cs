@@ -17,6 +17,7 @@ namespace AuxStructureLib
         public TriNode point1, point2, point3;
         public TriEdge edge1, edge2, edge3;
         public List<Triangle> CommonEdgeTriangleList = new List<Triangle>();//记录一个三角形邻接的建筑物列表
+        public List<TriEdge> EdgeList = new List<TriEdge>();
 
         public double W = -1;
      //  public int 

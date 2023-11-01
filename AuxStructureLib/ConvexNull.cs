@@ -23,6 +23,22 @@ namespace AuxStructureLib
             ConvexVertexSet = new List<TriNode>();
         }
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="_triNodeList">节点列表</param>
+        public ConvexNull(List<PointObject> PointObjectSet)
+        {
+            List<TriNode> _pointSet = new List<TriNode>();
+            for (int i = 0; i < PointObjectSet.Count; i++)
+            {
+                _pointSet.Add(PointObjectSet[i].Point);
+            }
+
+            PointSet = _pointSet;
+            ConvexVertexSet = new List<TriNode>();
+        }
+
         public List<TriEdge> GetConvexNull_Edges()
         {
             List<TriEdge> edges = new List<TriEdge>();

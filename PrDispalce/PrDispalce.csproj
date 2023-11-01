@@ -130,6 +130,12 @@
     <Compile Include="FlowMap\PublicUtil.cs" />
     <Compile Include="FlowMap\QuadNode.cs" />
     <Compile Include="FlowMap\QuadTree.cs" />
+    <Compile Include="FlowMap\Raster_Revision.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FlowMap\Raster_Revision.Designer.cs">
+      <DependentUpon>Raster_Revision.cs</DependentUpon>
+    </Compile>
     <Compile Include="FlowMap\Symbolization.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -144,6 +150,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FlowMap\FlowMap.resx">
       <DependentUpon>FlowMap.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FlowMap\Raster_Revision.resx">
+      <DependentUpon>Raster_Revision.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

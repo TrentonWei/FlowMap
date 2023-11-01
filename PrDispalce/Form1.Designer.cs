@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.flowMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rasterProcessingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.移除图层ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.axLicenseControl1 = new ESRI.ArcGIS.Controls.AxLicenseControl();
@@ -49,7 +50,8 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.flowMapToolStripMenuItem});
+            this.flowMapToolStripMenuItem,
+            this.rasterProcessingToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
@@ -63,6 +65,13 @@
             this.flowMapToolStripMenuItem.Size = new System.Drawing.Size(88, 24);
             this.flowMapToolStripMenuItem.Text = "FlowMap";
             this.flowMapToolStripMenuItem.Click += new System.EventHandler(this.flowMapToolStripMenuItem_Click);
+            // 
+            // rasterProcessingToolStripMenuItem
+            // 
+            this.rasterProcessingToolStripMenuItem.Name = "rasterProcessingToolStripMenuItem";
+            this.rasterProcessingToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
+            this.rasterProcessingToolStripMenuItem.Text = "RasterProcessing";
+            this.rasterProcessingToolStripMenuItem.Click += new System.EventHandler(this.rasterProcessingToolStripMenuItem_Click);
             // 
             // contextMenuStrip1
             // 
@@ -155,6 +164,7 @@
         private ESRI.ArcGIS.Controls.AxMapControl axMapControl1;
         private ESRI.ArcGIS.Controls.AxLicenseControl axLicenseControl1;
         private System.Windows.Forms.ToolStripMenuItem flowMapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rasterProcessingToolStripMenuItem;
     }
 }
 

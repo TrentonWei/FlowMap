@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 using ESRI.ArcGIS.esriSystem;
 using ESRI.ArcGIS.Controls;
@@ -144,6 +145,106 @@ namespace PrDispalce.FlowMap
 
             this.PathOrganized(PathPolylines);//对河流的系统进行组织！！！
             return PathPolylines;
+        }
+
+
+        ///// <summary>
+        ///// 深拷贝（通用拷贝）
+        ///// </summary>
+        ///// <param name="obj"></param>
+        ///// <returns></returns>
+        //public static object Clone(object obj)
+        //{
+        //    MemoryStream memoryStream = new MemoryStream();
+        //    BinaryFormatter formatter = new BinaryFormatter();
+        //    formatter.Serialize(memoryStream, obj);
+        //    memoryStream.Position = 0;
+        //    return formatter.Deserialize(memoryStream);
+        //}
+
+        /// <summary>
+        /// 按生成顺序返回路径
+        /// </summary>
+        /// <param name="PLList"></param>
+        /// <returns></returns>
+        public List<List<PolylineObject>> PathRankOrganized(List<PolylineObject> PLList)
+        {
+            List<List<PolylineObject>> FinalPath_SubPath = new List<List<PolylineObject>>();
+            List<PolylineObject> CachePLList = new List<PolylineObject>();
+            for (int i = 0; i < PLList.Count; i++)
+            {
+                CachePLList.Add(PLList[i]);
+            }
+
+            while (CachePLList.Count > 1)
+            {
+                List<List<PolylineObject>> Path_SubPath = new List<List<PolylineObject>>();
+                #region 获得剩余要素的所有路径
+                for (int i = 0; i < CachePLList.Count; i++)
+                {
+                    if (CachePLList[i].FlowIn == 0)
+                    {
+                        List<PolylineObject> SinglePath = new List<PolylineObject>();
+                        PolylineObject StartSubPath = CachePLList[i];
+                        SinglePath.Add(StartSubPath);
+
+                        while (StartSubPath.FlowOutId >= 0 && CachePLList.Contains(PLList[StartSubPath.FlowOutId]))
+                        {
+                            StartSubPath = PLList[StartSubPath.FlowOutId];
+                            SinglePath.Add(StartSubPath);
+                        }
+
+                        Path_SubPath.Add(SinglePath);
+                    }
+                }
+                #endregion
+
+                #region 获取要素中的最长路径
+                List<PolylineObject> LongestPath = Path_SubPath[0];
+                double LongestLength = this.GetPathLength(LongestPath);
+                for (int i = 1; i < Path_SubPath.Count; i++)
+                {
+                    if (this.GetPathLength(Path_SubPath[i]) > LongestLength)
+                    {
+                        LongestLength = this.GetPathLength(Path_SubPath[i]);
+                        LongestPath = Path_SubPath[i];
+                    }
+                }
+                #endregion
+
+                #region 更新
+                for (int i = 0; i < LongestPath.Count; i++)
+                {
+                    if (LongestPath[i].FlowOutId != -1)
+                    {
+                        CachePLList.Remove(LongestPath[i]);
+                    }
+                }
+                #endregion
+
+                FinalPath_SubPath.Add(LongestPath);
+            }
+
+            return FinalPath_SubPath;
+        }
+
+        /// <summary>
+        /// 获得一条路径的长度
+        /// </summary>
+        /// <param name="PLList"></param>
+        /// <returns></returns>
+        public double GetPathLength(List<PolylineObject> PLList)
+        {
+            double Dis = 0;
+            for (int i = 0; i < PLList.Count; i++)
+            {
+                if (PLList[i].Length == 0)
+                {
+                    PLList[i].GetLength();
+                }
+                Dis = Dis + PLList[i].Length;
+            }
+            return Dis;
         }
 
         /// <summary>
@@ -397,6 +498,52 @@ namespace PrDispalce.FlowMap
             return OnLineLable;
         }
 
+        /// <summary>
+        /// 获取某条路径在有组织路径中的前置路径
+        /// </summary>
+        /// <param name="TarPL"></param>
+        /// <param name="RankedList"></param>
+        /// <returns></returns>
+        public PolylineObject GetRankedAheadPath(PolylineObject TarPL,List<PolylineObject> PLList, List<List<PolylineObject>> RankedList)
+        {
+            if (TarPL.FlowOut == 0)//如果是起点路径，不考虑AheadPath
+            {
+                return null;
+            }
+
+            List<PolylineObject> TarRankedPath = this.GetRankedPath(TarPL, RankedList);//获得路径对应的RankedPath
+            PolylineObject AheadPath = null;
+            for (int i = 0; i < TarPL.FlowInIDList.Count; i++)
+            {
+                if(TarRankedPath.Contains(PLList[TarPL.FlowInIDList[i]]))
+                {
+                    AheadPath = PLList[TarPL.FlowInIDList[i]];
+                }
+            }
+
+            return AheadPath;
+        }
+
+        /// <summary>
+        /// 获取某条路径所处的Ranked路径
+        /// </summary>
+        /// <param name="TarPL"></param>
+        /// <param name="RankedList"></param>
+        /// <returns></returns>
+        public List<PolylineObject> GetRankedPath(PolylineObject TarPL, List<List<PolylineObject>> RankedList)
+        {
+            List<PolylineObject> TarRankedPath = new List<PolylineObject>();
+
+            for (int i = 0; i < RankedList.Count; i++)
+            {
+                if (RankedList[i].Contains(TarPL))
+                {
+                    TarRankedPath=RankedList[i];
+                }
+            }
+
+            return TarRankedPath;
+        }
 
         /// <summary>
         /// 判断一条给定的路径是否直线汇入主流（通过点来判断是否线性汇入）
@@ -427,6 +574,7 @@ namespace PrDispalce.FlowMap
 
             return OnLineLable;
         }
+
         /// <summary>
         /// 判断一条给定的路径是否直线汇入主流(通过矩阵格网来判断是否线性汇入)
         /// </summary>
@@ -1245,6 +1393,7 @@ namespace PrDispalce.FlowMap
         /// </summary>
         /// <param name="pWeighGrids"></param>
         /// <param name="desGrids"></param>
+        /// k表示Overlay的约束定义
         /// <returns></returns>
         public Dictionary<Tuple<int, int>, Dictionary<int, PathTrace>> GetDesDirPt_3(Dictionary<Tuple<int, int>, IPoint> GridWithNode, Dictionary<Tuple<int, int>, double> pWeighGrids, List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, List<double>> GridValue, int k)
         {
@@ -1283,6 +1432,29 @@ namespace PrDispalce.FlowMap
 
             return DesDirPt;
         }
+
+        /// <summary>
+        /// 获得给定的所有des节点在不做方向约束下的搜索图(只考虑了0阶的Overlay约束)
+        /// </summary>
+        /// <param name="pWeighGrids"></param>
+        /// <param name="desGrids"></param>
+        /// <returns></returns>
+        public Dictionary<Tuple<int, int>, PathTrace> GetDesDirPt_5(Tuple<int, int> sGrid,Dictionary<Tuple<int, int>, double> pWeighGrids, List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, List<Tuple<int, int>>> kOrderGrids)
+        {
+            Dictionary<Tuple<int, int>, PathTrace> DesDirPt = new Dictionary<Tuple<int, int>, PathTrace>();
+
+            foreach (Tuple<int, int> Grid in desGrids)
+            {
+                PathTrace CachePt = this.GetDirPt_5(sGrid,desGrids, pWeighGrids, Grid, kOrderGrids);
+                if (!DesDirPt.ContainsKey(Grid))
+                {
+                    DesDirPt.Add(Grid, CachePt);
+                }
+            }
+
+            return DesDirPt;
+        }
+
 
         /// <summary>
         /// 获得给定的所有des节点在不同方向下的搜索图
@@ -1505,7 +1677,8 @@ namespace PrDispalce.FlowMap
 
                 Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
                 //this.FlowOverLayContraint_2(desGrids, WeighGrids, k, TargetDes);//Overlay约束
-                this.FlowOverLayContraint_3Tar(desGrids, GridWithNode, WeighGrids, k, TargetDes, GridValue, true);//Overlay约束
+
+                this.FlowOverLayContraint_3Tar(desGrids, GridWithNode, WeighGrids, k, TargetDes, GridValue, true);//Overlay约束(注释即不考虑Overlay约束)
                 PathTrace Pt = new PathTrace();
                 List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
                 JudgeList.Add(Grid);//添加搜索的起点
@@ -1612,6 +1785,32 @@ namespace PrDispalce.FlowMap
 
             Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
             this.FlowOverLayContraint_4Tar(desGrids, WeighGrids, Grid,kOrderGrids);//Overlay约束;//Overlay约束
+            PathTrace Pt = new PathTrace();
+            List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
+            JudgeList.Add(Grid);//添加搜索的起点
+            Pt.MazeAlg(JudgeList, WeighGrids, 1, DirList);//备注：每次更新以后,WeightGrid会清零  
+
+            return Pt;
+        }
+
+        /// <summary>
+        /// 获得给定节点不做方向约束下的搜索图1（考虑n阶的Overlay约束）
+        /// </summary>
+        /// <param name="WeighGrids">权重格网</param>
+        /// <param name="Grid">目标网格</param>
+        /// <param name="desGrids">所有目标格网</param>
+        /// <param name="i">当前格网编号</param>
+        /// Grid 目标格网
+        /// TargetDes 出发格网
+        /// <returns></returns>获取给定节点不同方向编码的路径搜索
+        public PathTrace GetDirPt_5(Tuple<int, int> sGrid,List<Tuple<int, int>> desGrids, Dictionary<Tuple<int, int>, double> pWeighGrids, Tuple<int, int> Grid, Dictionary<Tuple<int, int>, List<Tuple<int, int>>> kOrderGrids)
+        {
+            PathTrace DirPt = new PathTrace();
+
+            List<int> DirList = this.GetAllDirR(sGrid, Grid);
+
+            Dictionary<Tuple<int, int>, double> WeighGrids = Clone((object)pWeighGrids) as Dictionary<Tuple<int, int>, double>;//深拷贝
+            this.FlowOverLayContraint_4Tar(desGrids, WeighGrids, Grid, kOrderGrids);//Overlay约束;//Overlay约束
             PathTrace Pt = new PathTrace();
             List<Tuple<int, int>> JudgeList = new List<Tuple<int, int>>();
             JudgeList.Add(Grid);//添加搜索的起点
@@ -2002,6 +2201,75 @@ namespace PrDispalce.FlowMap
         /// <param name="sPoint"></param>
         /// <param name="ePoint"></param>
         /// <returns></returns>
+        public List<int> GetAllDirR(Tuple<int, int> sGrid, Tuple<int, int> eGrid)
+        {
+            List<int> DirList = new List<int>();//获取限定的方向列表
+
+            #region 获取限定方向(方向编码：1-8,1正下，顺时针编码)
+            //下1；左2；上3；右4；左下5；左上6；右上7；右下8
+            int IADD = sGrid.Item1 - eGrid.Item1;
+            int JADD = sGrid.Item2 - eGrid.Item2;
+
+            if (IADD == 0)
+            {
+                if (JADD > 0)
+                {
+                    DirList.Add(4); DirList.Add(7); DirList.Add(8); DirList.Add(3); DirList.Add(1); DirList.Add(6); DirList.Add(5); DirList.Add(2);
+                }
+
+                if (JADD < 0)
+                {
+                    DirList.Add(2); DirList.Add(5); DirList.Add(6); DirList.Add(1); DirList.Add(3); DirList.Add(8); DirList.Add(7); DirList.Add(4); 
+                }
+            }
+
+            else if (IADD > 0)
+            {
+                if (JADD > 0)
+                {
+                    DirList.Add(7); DirList.Add(3); DirList.Add(4); DirList.Add(6); DirList.Add(8); DirList.Add(2); DirList.Add(1); DirList.Add(5);
+                }
+
+                if (JADD == 0)
+                {
+                    DirList.Add(3); DirList.Add(6); DirList.Add(7); DirList.Add(2); DirList.Add(4); DirList.Add(5); DirList.Add(8); DirList.Add(1);
+                }
+
+                if (JADD < 0)
+                {
+                    DirList.Add(6); DirList.Add(2); DirList.Add(3); DirList.Add(5); DirList.Add(7); DirList.Add(1); DirList.Add(4); DirList.Add(8);
+                }
+            }
+
+            else if (IADD < 0)
+            {
+                if (JADD > 0)
+                {
+                    DirList.Add(8); DirList.Add(4); DirList.Add(1); DirList.Add(7); DirList.Add(5); DirList.Add(3); DirList.Add(2); DirList.Add(6);
+                }
+
+                if (JADD == 0)
+                {
+                    DirList.Add(1); DirList.Add(5); DirList.Add(8); DirList.Add(2); DirList.Add(4); DirList.Add(6); DirList.Add(7); DirList.Add(3);
+                }
+
+                if (JADD < 0)
+                {
+                    DirList.Add(5); DirList.Add(2); DirList.Add(1); DirList.Add(6); DirList.Add(8); DirList.Add(3); DirList.Add(4); DirList.Add(7);
+                }
+            }
+            #endregion
+
+            //DirList.Sort();
+            return DirList;
+        }
+
+        /// <summary>
+        /// 判断ePoint向sPoint延伸的限制性方向
+        /// </summary>
+        /// <param name="sPoint"></param>
+        /// <param name="ePoint"></param>
+        /// <returns></returns>
         public List<int> GetConDir2(Tuple<int, int> sPoint, Tuple<int, int> ePoint)
         {
             List<int> DirList = new List<int>();//获取限定的方向列表
@@ -2200,6 +2468,7 @@ namespace PrDispalce.FlowMap
         /// <param name="CachePath">给定路径</param>
         /// <param name="PathGrids">已生成的路径Grids</param>
         /// <returns>=true表示相交；=false表示不相交</returns>
+        /// 1表示；2表示；0表示
         public int IntersectPathInt(List<Tuple<int, int>> CacheShortPath, List<Tuple<int, int>> PathGrids)
         {
             int IntersectCount = 0;
@@ -2222,12 +2491,20 @@ namespace PrDispalce.FlowMap
                      return 1;
                  }
 
+                 //处理是一类特殊情况：即
                  Tuple<int, int> CacheGrid1 = new Tuple<int, int>(CacheShortPath[i - 1].Item1, CacheShortPath[i].Item2);
-                 Tuple<int, int> CacheGrid2 = new Tuple<int, int>(CacheShortPath[i].Item1, CacheShortPath[i-1].Item2);
+                 Tuple<int, int> CacheGrid2 = new Tuple<int, int>(CacheShortPath[i].Item1, CacheShortPath[i - 1].Item2);
                  if (this.GridContain(CacheGrid1, PathGrids) && this.GridContain(CacheGrid2, PathGrids))
                  {
-                     IntersectLabel = true;
+                     int CacheIndex1 = this.GridContainIndex(CacheGrid1, PathGrids);
+                     int CacheIndex2 = this.GridContainIndex(CacheGrid2, PathGrids);
+
+                     if (Math.Abs(CacheIndex1 - CacheIndex2) == 1)
+                     {
+                         IntersectLabel = true;
+                     }
                  }
+
 
              }         
 
@@ -2448,6 +2725,29 @@ namespace PrDispalce.FlowMap
             #endregion
 
             return obstacleIntersect;
+        }
+
+        /// <summary>
+        /// 判断是否包含某一个Grid
+        /// </summary>
+        /// <param name="Grid"></param>
+        /// <param name="PathGrids"></param>
+        /// <returns></returns>
+        public int GridContainIndex(Tuple<int, int> Grid, List<Tuple<int, int>> PathGrids)
+        {
+            int Index = -1;
+
+            foreach (Tuple<int, int> CacheGrid in PathGrids)
+            {
+                if (CacheGrid.Item1 == Grid.Item1 &&
+                    CacheGrid.Item2 == Grid.Item2)
+                {
+                    Index = PathGrids.IndexOf(CacheGrid);
+                    break;
+                }
+            }
+
+            return Index;
         }
 
         /// <summary>

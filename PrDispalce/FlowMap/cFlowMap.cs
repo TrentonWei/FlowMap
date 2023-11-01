@@ -203,6 +203,106 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
+        /// 获取分段路径
+        /// </summary>
+        /// <param name="TargetIntersect"></param>
+        /// <returns></returns>
+        public List<Path> GetDividedPath(Tuple<int, int> TargetIntersect)
+        {
+            List<Path> DividedPaths = new List<Path>();
+
+            #region 获取分段路径
+            foreach (Path CachePa in SubPaths)
+            {
+                bool StopLabel = false;
+                if (CachePa.ePath.Contains(TargetIntersect))
+                {
+                    int Index = CachePa.ePath.IndexOf(TargetIntersect);//获取交叉点的Index
+
+                    #region 连接的路径终点更新路径（若连接的是路径的起点，则不更新）
+                    if (Index == CachePa.ePath.Count - 1)
+                    {
+                        return null;
+                    }
+                    #endregion
+
+                    #region 连接的路径中间点
+                    else if (Index > 0)
+                    {
+                        //CachePa分两段
+                        Path Path1 = new Path(CachePa.ePath[0], TargetIntersect, CachePa.ePath.Take(CachePa.ePath.IndexOf(TargetIntersect) + 1).ToList());//前半段
+                        Path Path2 = new Path(TargetIntersect, CachePa.ePath[CachePa.ePath.Count - 1], CachePa.ePath.GetRange(CachePa.ePath.IndexOf(TargetIntersect), CachePa.ePath.Count - CachePa.ePath.IndexOf(TargetIntersect)));//后半段
+
+                        DividedPaths.Add(Path1);
+                        DividedPaths.Add(Path2);
+
+                        StopLabel = true;
+                    }
+                    #endregion
+                }
+
+                if (StopLabel)
+                {
+                    break;
+                }             
+            }
+            #endregion
+            
+            return DividedPaths;
+        }
+
+        /// <summary>
+        /// 获取分段路径
+        /// </summary>
+        /// <param name="TargetIntersect"></param>
+        /// <returns></returns>false 非转折点；true 转折点
+        public bool TurningNot(Tuple<int, int> TargetIntersect)
+        {
+            bool Label = false;
+
+            #region 获取分段路径
+            foreach (Path CachePa in SubPaths)
+            {
+                bool StopLabel = false;
+                if (CachePa.ePath.Contains(TargetIntersect))
+                {
+                    int Index = CachePa.ePath.IndexOf(TargetIntersect);//获取交叉点的Index
+
+                    #region 连接的路径终点更新路径（若连接的是路径的起点，则不更新）
+                    if (Index == CachePa.ePath.Count - 1 || Index == 0)
+                    {
+                        return false;
+                    }
+                    #endregion
+
+                    #region 否则，判断是否是转折点
+                    else
+                    {
+                        Tuple<int, int> BeforeGrid = CachePa.ePath[Index - 1];
+                        Tuple<int, int> AfterGrid = CachePa.ePath[Index + 1];
+
+                        if ((BeforeGrid.Item2 - TargetIntersect.Item2) != (TargetIntersect.Item2 - AfterGrid.Item2)
+                            || (BeforeGrid.Item1 - TargetIntersect.Item1) != (TargetIntersect.Item1 - AfterGrid.Item1))
+                        {
+                            Label = true;
+                        }
+                    }
+                    #endregion
+
+                    StopLabel = true;
+                }
+
+                if (StopLabel)
+                {
+                    break;
+                }
+            }
+            #endregion
+
+            return Label;
+        }
+
+        /// <summary>
         /// 依据给定的Path,更新FlowMap中的路径网格和路径(考虑流量和子路径的更新)
         /// </summary>
         /// <param name="CachePath"></param>
@@ -214,6 +314,7 @@ namespace PrDispalce.FlowMap
             OrderPaths.Add(OrderPaths.Keys.Count, CachePath);//添加每一条新增加的路径
 
             #region 更新子路径
+
             #region 获取交叉点
             int IntersectLocation = 0; Tuple<int, int> TargetIntersect = null;
             for (int i = 0; i < CachePath.ePath.Count; i++)

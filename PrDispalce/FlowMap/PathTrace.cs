@@ -402,7 +402,6 @@ namespace PrDispalce.FlowMap
             }
             #endregion
 
-            int TestLocation = 0;
 
             #region 按顺序添加
             while (CacheGridWeigh.Keys.Count > 0)
@@ -1470,7 +1469,7 @@ namespace PrDispalce.FlowMap
                 }
 
                 ///需要考虑可能不存在路径的情况
-                if (ePoint == null &&ShortestPath.Count==1)
+                if (ePoint == null && ShortestPath.Count==1)
                 {
                     return null;
                 }

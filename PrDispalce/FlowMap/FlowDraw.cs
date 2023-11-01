@@ -826,6 +826,122 @@ namespace PrDispalce.FlowMap
                 OutMap.WriteResult2Shp(OutPath, pMapControl.Map.SpatialReference, 1);
             }
             #endregion
+        }
+
+        /// <summary>
+        /// 针对给定的Layout
+        /// </summary>
+        /// <param name="PLList"></param>
+        /// <param name="AngleThr"></param>
+        /// <param name="FreeCount"></param>
+        /// <param name="OnLineIn"></param>
+        /// <param name="Rate1">控制点2 贝塞尔曲线1Non-hang edge偏移比例</param>
+        /// <param name="Rate2">控制点2 贝塞尔曲线1hang edge偏移比例偏移比例</param>
+        /// <param name="Cur2DisRate">控制点1的偏移长度</param>格网偏移长度值
+        /// <param name="OutType"></param>
+        /// <param name="InsertPoint"></param>
+        public void LayoutSmoothMap_3(List<PolylineObject> PLList,List<List<PolylineObject>> RankedList, double AngleThr, bool FreeCount, bool OnLineIn, double Rate1, double Rate2, double Cur2DisRate, int OutType, int InsertPoint)
+        {
+            PrDispalce.FlowMap.PublicUtil PU = new PublicUtil();
+            FlowMapUtil FMU = new FlowMapUtil();
+            SMap OutMap = new SMap();
+            SMap OutEdgeMap = new SMap();
+
+            #region 贝塞尔曲线生成
+            int LabelCount = 0;
+            foreach (PolylineObject PL in PLList)
+            {
+                LabelCount++;
+                List<IPoint> ControlPoints = this.GetShiftControlPoints_5(PL, RankedList,PLList, AngleThr, FreeCount, OnLineIn, Rate1, Rate2, Cur2DisRate);
+
+                BezierCurve BC = new BezierCurve(ControlPoints);//直接把控制点赋值给贝塞尔曲线了
+                BC.CurveNGenerate(InsertPoint);//贝塞尔曲线生成
+                List<TriNode> LinePoints = this.BCDraw(BC, OutType, PL.SylWidth);//贝塞尔曲线绘制
+
+                #region 需要输出
+                if (OutType == 1)
+                {
+                    PolylineObject CacheLine = new PolylineObject(LinePoints);
+                    CacheLine.Volume = PL.Volume;
+                    CacheLine.shift = PL.shift;
+                    CacheLine.LOrR = PL.LOrR;
+                    CacheLine.GetLength();//计算长度
+                    CacheLine.SmoothValue = PU.GetSmoothValue(CacheLine);
+                    CacheLine.FlowIn = PL.FlowIn;
+                    CacheLine.FlowOut = PL.FlowOut;
+                    CacheLine.SylWidth = PL.SylWidth;
+                    CacheLine.Volume = PL.Volume;
+                    CacheLine.ShiftDis = PL.ShiftDis;
+                    OutMap.PolylineList.Add(CacheLine);
+                }
+                #endregion
+            }
+            #endregion
+
+            #region 需要输出
+            if (OutType == 1 && OutPath != null)
+            {
+                OutMap.WriteResult2Shp(OutPath, pMapControl.Map.SpatialReference, 1);
+            }
+            #endregion
+        }
+
+        /// <summary>
+        /// 针对给定的Layout
+        /// </summary>
+        /// <param name="PLList"></param>
+        /// <param name="AngleThr"></param>直线汇入的角度阈值——通过格网判断
+        /// <param name="FreeCount"></param>是否是自由边
+        /// <param name="OnLineIn"></param>
+        /// <param name="Rate1">控制点2 贝塞尔曲线1Non-hang edge偏移比例</param>
+        /// <param name="Rate2">控制点2 贝塞尔曲线1hang edge偏移比例偏移比例</param>
+        /// <param name="Cur2DisRate">控制点1的偏移长度</param>
+        /// <param name="OutType"></param>
+        /// <param name="InsertPoint"></param>
+        public void LayoutSmoothMap_3(List<PolylineObject> PLList, double AngleThr, bool FreeCount, bool OnLineIn, double Rate1, double Rate2, double Cur2DisRate, int OutType, int InsertPoint)
+        {
+            PrDispalce.FlowMap.PublicUtil PU = new PublicUtil();
+            FlowMapUtil FMU = new FlowMapUtil();
+            SMap OutMap = new SMap();
+            SMap OutEdgeMap = new SMap();
+
+            #region 贝塞尔曲线生成
+            int LabelCount = 0;
+            foreach (PolylineObject PL in PLList)
+            {
+                LabelCount++;
+                List<IPoint> ControlPoints = this.GetShiftControlPoints_4(PL, PLList, AngleThr, FreeCount, OnLineIn, Rate1, Rate2, Cur2DisRate);
+
+                BezierCurve BC = new BezierCurve(ControlPoints);//直接把控制点赋值给贝塞尔曲线了
+                BC.CurveNGenerate(InsertPoint);//贝塞尔曲线生成
+                List<TriNode> LinePoints = this.BCDraw(BC, OutType, PL.SylWidth);//贝塞尔曲线绘制
+
+                #region 需要输出
+                if (OutType == 1)
+                {
+                    PolylineObject CacheLine = new PolylineObject(LinePoints);
+                    CacheLine.Volume = PL.Volume;
+                    CacheLine.shift = PL.shift;
+                    CacheLine.LOrR = PL.LOrR;
+                    CacheLine.GetLength();//计算长度
+                    CacheLine.SmoothValue = PU.GetSmoothValue(CacheLine);
+                    CacheLine.FlowIn = PL.FlowIn;
+                    CacheLine.FlowOut = PL.FlowOut;
+                    CacheLine.SylWidth = PL.SylWidth;
+                    CacheLine.Volume = PL.Volume;
+                    CacheLine.ShiftDis = PL.ShiftDis;
+                    OutMap.PolylineList.Add(CacheLine);
+                }
+                #endregion
+            }
+            #endregion
+
+            #region 需要输出
+            if (OutType == 1 && OutPath != null)
+            {
+                OutMap.WriteResult2Shp(OutPath, pMapControl.Map.SpatialReference, 1);
+            }
+            #endregion
         }      
 
         /// <summary>
@@ -1446,11 +1562,163 @@ namespace PrDispalce.FlowMap
             }
             #endregion
 
-            #region 对于任意的边都添加控制点【以简单贝塞尔曲线来添加控制点！】
+            #region 对于任意的其它边都添加控制点【以简单贝塞尔曲线来添加控制点！】
             else
             {
                 #region 考虑是否是直线汇入
                 if (OnLineIn && FlowInOnLine)
+                {
+                    if (TarPL.FlowOut > 0)//不是起点
+                    {
+                        if (PLList[TarPL.FlowOutId].FlowOut > 0)//汇入的不是起点
+                        {
+                            List<IPoint> FlowOutPathPoints = PU.GetPoints(PLList[TarPL.FlowOutId]);
+                            List<IPoint> InsertControlPoint = this.GetShiftInsertControlPoint(ControlPoints, FlowOutPathPoints[FlowOutPathPoints.Count - 2], FlowOutPathPoints[FlowOutPathPoints.Count - 1], TarPL.ShiftDis, Rate2);
+                            ControlPoints[0] = InsertControlPoint[0];//插入该控制点
+                            ControlPoints.Insert(1, InsertControlPoint[1]);
+                        }
+                    }
+                }
+                #endregion
+            }
+            #endregion
+
+            return ControlPoints;
+        }
+
+        /// <summary>
+        /// 获得按宽度偏移后的控制点！
+        /// </summary>
+        /// <param name="TarPL">给定路径</param>
+        /// <param name="PLList">路径List</param>
+        /// RankedList 按长度顺序组织的路径
+        /// <param name="AngleThr">直线汇入的角度阈值</param>
+        /// <param name="FreeCount">FreeCount=false 不考虑是否是Free边；=True 考虑是否是Free边</param>
+        /// <param name="OnLineIn">是否考虑共线问题 OnLineIn=false 不考虑是否直线汇入；=true 考虑是直线汇入</param>
+        /// <param name="Rate1">贝塞尔曲线Noe-hang edges控制点偏移比例</param>
+        /// Rate2 贝塞尔曲线hang edges偏移比例尺控制点偏移比例
+        /// <param name="Cur2DisRate">贝塞尔曲线2控制点偏移距离比例</param>
+        /// <returns></returns>
+        public List<IPoint> GetShiftControlPoints_5(PolylineObject TarPL, List<List<PolylineObject>> RankedList,List<PolylineObject> PLList, double AngleThr, bool FreeCount, bool OnLineIn, double Rate1, double Rate2, double Cur2DisRate)
+        {
+            List<IPoint> ControlPoints = new List<IPoint>();
+            FlowMapUtil FMU = new FlowMapUtil();
+            PublicUtil PU = new PublicUtil();
+            ControlPoints = PU.GetPoints(TarPL);//获得转折点
+            bool FlowInOnLine = FMU.FlowPathOnLine_2(TarPL, PLList, AngleThr);//路径是否直线流入主流
+            PolylineObject RankAheadPath = FMU.GetRankedAheadPath(TarPL, PLList, RankedList);
+
+            #region 考虑是否是自由边和不考虑非自由边中的非直线汇入（只对自由边添加控制点）【直线汇入添加对应控制点绘制贝塞尔曲线也是直线！】
+            if (FreeCount && !OnLineIn)
+            {
+                #region  如果是自由边且非直线汇入，添加控制点
+                if (TarPL.FlowIn == 0 && !FlowInOnLine)//是自由边，且非直线汇入
+                {
+                    if (TarPL.FlowOut > 0)//不是起点
+                    {
+                        if (PLList[TarPL.FlowOutId].FlowOut > 0)//汇入的不是起点
+                        {
+                            List<IPoint> FlowOutPathPoints = PU.GetPoints(PLList[TarPL.FlowOutId]);
+                            List<IPoint> InsertControlPoints = this.GetShiftInsertControlPoint_3(ControlPoints, FlowOutPathPoints[FlowOutPathPoints.Count - 2], FlowOutPathPoints[FlowOutPathPoints.Count - 1], TarPL.ShiftDis, Cur2DisRate, Rate2, true);//偏移距离已提前计算！
+                            
+                            
+                            if (ControlPoints.Count < 3)
+                            {
+                                ControlPoints[0] = InsertControlPoints[0];
+                                ControlPoints.Insert(1, InsertControlPoints[1]);//插入该控制点
+                                ControlPoints.Insert(2, InsertControlPoints[2]);//插入该控制点
+                            }
+                            else
+                            {
+                                ControlPoints[0] = InsertControlPoints[0];
+                                ControlPoints.Insert(1, InsertControlPoints[1]);//插入该控制点
+                            }
+                        }
+                    }
+                }
+                #endregion
+            }
+            #endregion
+
+            #region 考虑是否是自由边；同时，不考虑非自由边中的非直线汇入
+            else if (FreeCount && OnLineIn)
+            {
+                #region 如果是自由边，则添加控制点
+                if (TarPL.FlowIn == 0)//判断是否是自由边 自由边添加
+                {
+                    if (TarPL.FlowOut > 0)//不是起点
+                    {
+                        if (PLList[TarPL.FlowOutId].FlowOut > 0)//汇入的不是起点
+                        {
+                            List<IPoint> FlowOutPathPoints = PU.GetPoints(PLList[TarPL.FlowOutId]);
+                            List<IPoint> InsertControlPoints = this.GetShiftInsertControlPoint_3(ControlPoints, FlowOutPathPoints[FlowOutPathPoints.Count - 2], FlowOutPathPoints[FlowOutPathPoints.Count - 1], TarPL.ShiftDis, Cur2DisRate, Rate2, true);//偏移距离已提前计算！
+                            if (ControlPoints.Count < 3)
+                            {
+                                ControlPoints[0] = InsertControlPoints[0];
+                                ControlPoints.Insert(1, InsertControlPoints[1]);//插入该控制点
+                                ControlPoints.Insert(2, InsertControlPoints[2]);//插入该控制点
+                            }
+                            else
+                            {
+                                ControlPoints[0] = InsertControlPoints[0];
+                                ControlPoints.Insert(1, InsertControlPoints[1]);//插入该控制点
+                            }                     
+                        }
+                    }
+                }
+                #endregion
+
+                #region 如果是非自由边且是非直线汇入，则添加控制点
+                else
+                {
+                    if (TarPL.FlowOut > 0)//不是起点
+                    {
+                        if (PLList[TarPL.FlowOutId].FlowOut > 0)//汇入的不是起点
+                        {
+                            List<IPoint> FlowOutPathPoints = PU.GetPoints(PLList[TarPL.FlowOutId]);
+                            List<IPoint> InsertControlPoints = this.GetShiftInsertControlPoint_3(ControlPoints, FlowOutPathPoints[FlowOutPathPoints.Count - 2], FlowOutPathPoints[FlowOutPathPoints.Count - 1], TarPL.ShiftDis, Cur2DisRate, Rate1, false);//偏移距离已提前计算！
+                            
+                            ///若非自由边的主流汇入边不为空
+                            IPoint CacheInsertPoint = new PointClass();//考虑的主流汇入情况
+                            if (RankAheadPath != null)
+                            {
+                                List<IPoint> FlowInPathPoints = PU.GetPoints(RankAheadPath);//获取前一条路径的点
+                                //Double CacheDis1=PU.GetDis(ControlPoints[ControlPoints.Count-1],ControlPoints[ControlPoints.Count-2]);
+                                //Double ShiftDis=CacheDis1*Rate1;
+                                Double CacheDis1 = Cur2DisRate * 2;
+                                Double CacheDis2=PU.GetDis(FlowInPathPoints[0],FlowInPathPoints[1]);
+                                Double CacheRate=-(CacheDis1+CacheDis2)/CacheDis1;
+                                CacheInsertPoint = PU.GetExtendPoint(FlowInPathPoints[1],FlowInPathPoints[0],CacheRate);
+                            }
+                            
+                            if (ControlPoints.Count < 3)//只有两个控制点
+                            {
+                                ControlPoints[0] = InsertControlPoints[0];
+                                ControlPoints.Insert(1, InsertControlPoints[1]);//插入该控制点
+                                ControlPoints.Insert(2, InsertControlPoints[2]);//插入该控制点
+                            }
+                            else //有多个控制点
+                            {
+                                ControlPoints[0] = InsertControlPoints[0];
+                                ControlPoints.Insert(1, InsertControlPoints[1]);//插入该控制点
+                            }
+
+                            if (CacheInsertPoint != null)
+                            {
+                                ControlPoints.Insert(ControlPoints.Count - 1, CacheInsertPoint);//插入倒数第二位
+                            }
+                        }
+                    }
+                }
+                #endregion
+            }
+            #endregion
+
+            #region 对于任意的其它边都添加控制点【以简单贝塞尔曲线来添加控制点！】
+            else
+            {
+                #region 考虑是否是直线汇入
+                if (OnLineIn && FlowInOnLine) //FlowInOnLine直线汇入
                 {
                     if (TarPL.FlowOut > 0)//不是起点
                     {
@@ -2123,7 +2391,7 @@ namespace PrDispalce.FlowMap
             ShiftControlPoints.Add(InsertPoint_1);
             #endregion
 
-            if (TurningPoints.Count < 3)
+            if (TurningPoints.Count < 3)//若控制点小于3，则获取无偏移的第二个点
             {
                 double AheadDis_2 = PU.GetDis(TurningPoints[0], TurningPoints[1]);
                 double ShiftDis = AheadDis_2 * ShiftDisRate;

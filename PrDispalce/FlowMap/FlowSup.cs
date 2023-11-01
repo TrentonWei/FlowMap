@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 using ESRI.ArcGIS.esriSystem;
 using ESRI.ArcGIS.Controls;
@@ -215,7 +217,7 @@ namespace PrDispalce.FlowMap
         }
  
         /// <summary>
-        /// 针对制定范围构建索引
+        /// 针对制定范围构建索引（均往外扩展半格边界）
         /// </summary>
         /// <param name="ENVELOPE"></param> [MinX,MinY,MaxX,MaxY]【左下角往右上角编码】
         /// <param name="gridXY"></param>[格网横向、纵向间隔]
@@ -270,7 +272,57 @@ namespace PrDispalce.FlowMap
         }
 
         /// <summary>
-        /// 针对制定范围构建索引
+        /// 针对制定范围构建索引(不扩展边界)
+        /// </summary>
+        /// <param name="ENVELOPE"></param> [MinX,MinY,MaxX,MaxY]【左下角往右上角编码】
+        /// <param name="gridXY"></param>[格网横向、纵向间隔]
+        /// <param name="colNum"></param>[输出列]
+        /// <param name="rowNum"></param>[输出行]
+        /// <returns>Tuple<int,int>=IJ;List<double>={MinX,MinY,MaxX,MaxY}</returns>
+        public Dictionary<Tuple<int, int>, List<double>> GetGridNonExtend(double[] ENVELOPE, double[] gridXY, ref int colNum, ref int rowNum)
+        {
+            Dictionary<Tuple<int, int>, List<double>> Grids = new Dictionary<Tuple<int, int>, List<double>>();
+
+            #region 获取格网横向纵向间隔
+            double gridX = gridXY[0];
+            double gridY = gridXY[1];
+            #endregion
+
+            #region 计算边界
+            double minX = ENVELOPE[0];
+            double minY = ENVELOPE[1];
+            double maxX = ENVELOPE[2];
+            double maxY = ENVELOPE[3];
+            #endregion
+
+            #region 计算栅格索引行、列数目
+            colNum = (int)(Math.Abs(maxX - minX) / gridX) + (isDivide(Math.Abs(maxX - minX), gridX) == true ? 0 : 1);//列数
+            rowNum = (int)(Math.Abs(maxY - minY) / gridY) + (isDivide(Math.Abs(maxY - minY), gridY) == true ? 0 : 1);//行数
+            #endregion
+
+            #region 返回每一个行列的范围
+            for (int i = 0; i < rowNum; i++)
+            {
+                for (int j = 0; j < colNum; j++)
+                {
+                    List<double> ExtendIJ = new List<double>();
+                    double MinXIJ = j * gridX + minX;
+                    double MinYIJ = i * gridY + minY;
+                    double MaxXIJ = (j + 1) * gridX + minX;
+                    double MaxYIJ = (i + 1) * gridY + minY;
+                    ExtendIJ.Add(MinXIJ); ExtendIJ.Add(MinYIJ); ExtendIJ.Add(MaxXIJ); ExtendIJ.Add(MaxYIJ);
+
+                    Tuple<int, int> IJ = new Tuple<int, int>(i, j);
+                    Grids.Add(IJ, ExtendIJ);
+                }
+            }
+            #endregion
+
+            return Grids;
+        }
+
+        /// <summary>
+        /// 获取K-order的索引
         /// </summary>
         /// <param name="ENVELOPE"></param> [MinX,MinY,MaxX,MaxY]【左下角往右上角编码】
         /// <param name="gridXY"></param>[格网横向、纵向间隔]
@@ -375,6 +427,115 @@ namespace PrDispalce.FlowMap
             #endregion
 
             return GridType;
+        }
+
+        /// <summary>
+        /// 深拷贝（通用拷贝）
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static object Clone(object obj)
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            BinaryFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(memoryStream, obj);
+            memoryStream.Position = 0;
+            return formatter.Deserialize(memoryStream);
+        }
+
+        /// <summary>
+        /// 计算获取不同区域的数据类型(只区分Land和非Land)
+        /// </summary>
+        /// <param name="?"></param>
+        /// <param name="ObstacleFeatures"></param>
+        /// <returns>0表示Land；1表示非Land</returns>
+        public Dictionary<Tuple<int, int>, List<double>> GetInGrid(Dictionary<Tuple<int, int>, List<double>> Grids, List<Tuple<IGeometry, esriGeometryType>> ObstacleFeatures, double IntersectTd)
+        {
+            Dictionary<Tuple<int, int>, List<double>> OutGrids = Clone((object)Grids) as Dictionary<Tuple<int, int>, List<double>>;
+
+            #region 判断过程
+            foreach (KeyValuePair<Tuple<int, int>, List<double>> kv in Grids)
+            {
+                #region 网格范围
+                Ring ring1 = new RingClass();
+                object missing = Type.Missing;
+
+                IPoint curResultPoint1 = new PointClass();
+                IPoint curResultPoint2 = new PointClass();
+                IPoint curResultPoint3 = new PointClass();
+                IPoint curResultPoint4 = new PointClass();
+
+                curResultPoint1.PutCoords(kv.Value[0], kv.Value[1]);
+                curResultPoint2.PutCoords(kv.Value[2], kv.Value[1]);
+                curResultPoint3.PutCoords(kv.Value[2], kv.Value[3]);
+                curResultPoint4.PutCoords(kv.Value[0], kv.Value[3]);
+
+                ring1.AddPoint(curResultPoint1, ref missing, ref missing);
+                ring1.AddPoint(curResultPoint4, ref missing, ref missing);
+                ring1.AddPoint(curResultPoint3, ref missing, ref missing);
+                ring1.AddPoint(curResultPoint2, ref missing, ref missing);
+                ring1.AddPoint(curResultPoint1, ref missing, ref missing);
+
+                IGeometryCollection pointPolygon = new PolygonClass();
+                pointPolygon.AddGeometry(ring1 as IGeometry, ref missing, ref missing);
+                IPolygon pPolygon = pointPolygon as IPolygon;
+
+                IArea pArea = pPolygon as IArea;
+                //double dpArea = pArea.Area;
+                #endregion
+
+                ITopologicalOperator iTo = pPolygon as ITopologicalOperator;
+                IRelationalOperator iRo = pPolygon as IRelationalOperator;
+
+                #region 判断Land区域交叉
+                bool GridValid = false;
+                if (ObstacleFeatures.Count > 0)
+                {
+                    foreach (Tuple<IGeometry, esriGeometryType> pFeature in ObstacleFeatures)
+                    {
+                        if (IntersectTd == 0)
+                        {
+                            if (iRo.Overlaps(pFeature.Item1)||iRo.Within(pFeature.Item1)||iRo.Crosses(pFeature.Item1))
+                            {
+                                GridValid = true;
+                            }
+                        }
+
+
+                        else
+                        {
+                            if (pFeature.Item2 == esriGeometryType.esriGeometryPolygon)
+                            {
+                                IGeometry IGeo = iTo.Intersect(pFeature.Item1, esriGeometryDimension.esriGeometry2Dimension);
+                                {
+                                    if (!IGeo.IsEmpty)
+                                    {
+                                        IArea gArea = IGeo as IArea;
+                                        //double dgArea = gArea.Area;
+                                        //double Cachek = Math.Abs(gArea.Area) / Math.Abs(pArea.Area);
+
+                                        if (Math.Abs(gArea.Area) / Math.Abs(pArea.Area) > IntersectTd)
+                                        {
+                                            GridValid = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }              
+                    }
+                }
+                #endregion
+
+                #region 交叉大于一定比例才是Land
+                if (!GridValid)
+                {
+                    OutGrids.Remove(kv.Key);
+                }
+                #endregion
+            }
+            #endregion
+
+            return OutGrids;
         }
 
         /// <summary>
@@ -521,6 +682,117 @@ namespace PrDispalce.FlowMap
             #endregion
 
             return Grids;
+        }
+
+        /// <summary>
+        /// 针对指定范围构建索引（删除存在阻隔的格网！！！）
+        /// </summary>
+        /// Grids现有的网格
+        /// ObstacleFeatures 阻隔Features
+        /// IntersectedTd交叉比约束
+        /// 备注：i标识行数；j标识列数
+        /// <returns>Tuple<int,int>=IJ;List<double>={MinX,MinY,MaxX,MaxY}</returns>
+        public void GetGridConObstacle(Dictionary<Tuple<int, int>, List<double>> Grids, List<Tuple<IGeometry, esriGeometryType>> ObstacleFeatures, double IntersectTd)
+        {
+            #region 判断过程
+            for (int i = Grids.Count - 1; i >= 0; i--)
+            {
+                KeyValuePair<Tuple<int, int>, List<double>> Kv = Grids.ElementAt(i);
+
+                bool GridValid = false;
+                if (ObstacleFeatures.Count > 0)
+                {
+                    foreach (Tuple<IGeometry, esriGeometryType> pFeature in ObstacleFeatures)
+                    {
+                        #region 网格范围
+                        Ring ring1 = new RingClass();
+                        object missing = Type.Missing;
+
+                        IPoint curResultPoint1 = new PointClass();
+                        IPoint curResultPoint2 = new PointClass();
+                        IPoint curResultPoint3 = new PointClass();
+                        IPoint curResultPoint4 = new PointClass();
+
+                        curResultPoint1.PutCoords(Kv.Value[0], Kv.Value[1]);
+                        curResultPoint2.PutCoords(Kv.Value[2], Kv.Value[1]);
+                        curResultPoint3.PutCoords(Kv.Value[2], Kv.Value[3]);
+                        curResultPoint4.PutCoords(Kv.Value[0], Kv.Value[3]);
+
+                        ring1.AddPoint(curResultPoint1, ref missing, ref missing);
+                        ring1.AddPoint(curResultPoint4, ref missing, ref missing);
+                        ring1.AddPoint(curResultPoint3, ref missing, ref missing);
+                        ring1.AddPoint(curResultPoint2, ref missing, ref missing);
+                        ring1.AddPoint(curResultPoint1, ref missing, ref missing);
+
+                        IGeometryCollection pointPolygon = new PolygonClass();
+                        pointPolygon.AddGeometry(ring1 as IGeometry, ref missing, ref missing);
+                        IPolygon pPolygon = pointPolygon as IPolygon;
+
+                        IArea pArea = pPolygon as IArea;
+                        //double dpArea = pArea.Area;
+                        #endregion
+
+                        ITopologicalOperator iTo = pPolygon as ITopologicalOperator;
+
+                        #region 判断交叉
+                        #region 点状障碍物
+                        if (pFeature.Item2 == esriGeometryType.esriGeometryPoint)
+                        {
+                            IGeometry IGeo = iTo.Intersect(pFeature.Item1, esriGeometryDimension.esriGeometry0Dimension);
+                            {
+                                if (!IGeo.IsEmpty)
+                                {
+                                    GridValid = true;
+                                    break;
+                                }
+                            }
+                        }
+                        #endregion
+
+                        #region 线状障碍物
+                        if (pFeature.Item2 == esriGeometryType.esriGeometryPolyline)
+                        {
+                            IGeometry IGeo = iTo.Intersect(pFeature.Item1, esriGeometryDimension.esriGeometry1Dimension);
+                            {
+                                if (!IGeo.IsEmpty)
+                                {
+                                    GridValid = true;
+                                    break;
+                                }
+                            }
+                        }
+                        #endregion
+
+                        #region 面状障碍物
+                        if (pFeature.Item2 == esriGeometryType.esriGeometryPolygon)
+                        {
+                            IGeometry IGeo = iTo.Intersect(pFeature.Item1, esriGeometryDimension.esriGeometry2Dimension);
+                            {
+                                if (!IGeo.IsEmpty)
+                                {
+                                    IArea gArea = IGeo as IArea;
+                                    //double dgArea = gArea.Area;
+                                    double Cachek = Math.Abs(gArea.Area) / Math.Abs(pArea.Area);
+
+                                    if (Math.Abs(gArea.Area) / Math.Abs(pArea.Area) > IntersectTd)
+                                    {
+                                        GridValid = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        #endregion
+                        #endregion
+                    }
+                }
+
+                if (GridValid)
+                {
+                    Grids.Remove(Kv.Key);
+                }
+            }
+            #endregion
         }
 
         /// <summary>
@@ -715,6 +987,11 @@ namespace PrDispalce.FlowMap
                 if (Type == 1)
                 {
                     Weigth = SumFlow;
+                }
+
+                if (Type == 4)///不考虑权重
+                {
+                    Weigth = 1;
                 }
 
                 else if (Type == 2)
@@ -1109,7 +1386,6 @@ namespace PrDispalce.FlowMap
 
             DistanceList.Sort();
             #endregion
-            //DistanceList.Reverse();
 
             #region 获取前5%距离的平均值的一半
             if (Type == 1)
@@ -1117,7 +1393,8 @@ namespace PrDispalce.FlowMap
                 List<double> largerList = DistanceList.Take(Convert.ToInt16(Math.Ceiling(DistanceList.Count * Percent))).ToList<double>();
                 double PixelSize = largerList.Sum() / largerList.Count;
 
-                XYLength[0] = PixelSize / 2; XYLength[1] = PixelSize / 2;
+                XYLength[0] = PixelSize / 2; 
+                XYLength[1] = PixelSize / 2;
             }
             #endregion
 
@@ -1127,7 +1404,8 @@ namespace PrDispalce.FlowMap
                 List<double> largerList = DistanceList.Take(Convert.ToInt16(Math.Ceiling(DistanceList.Count * Percent))).ToList<double>();
                 double PixelSize = largerList.Sum() / largerList.Count;
 
-                XYLength[0] = PixelSize / 4; XYLength[1] = PixelSize / 4;
+                XYLength[0] = PixelSize / 4; 
+                XYLength[1] = PixelSize / 4;
             }
 
 

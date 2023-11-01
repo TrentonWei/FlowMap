@@ -414,6 +414,6 @@ namespace PrDispalce.CGFlowMap
 
             OutFilePath = outfilepath;
             this.comboBox2.Text = OutFilePath;
-        }   
+        }
     }
 }

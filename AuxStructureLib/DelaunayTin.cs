@@ -711,5 +711,378 @@ namespace AuxStructureLib
             TriEdge.Create_WriteEdge2Shp(filepath, @"cEdge", this.TriEdgeList, pSpatialReference);
             Triangle.Create_WriteTriange2Shp(filepath, @"cTriangle", this.TriangleList, pSpatialReference);
         }
+
+        /// <summary>
+        /// 邻近图的三角形结构
+        /// </summary>
+        public class GraphTriangle
+        {
+            public int ID;
+            public List<TriEdge> EdgeList = new List<TriEdge>();
+        }
+
+     
+
+        /// <summary>
+        /// 创建AlphaShape
+        /// 边不能有重复（重复会出问题）
+        /// </summary>
+        /// <param name="Distance"></param>
+        /// <returns></returns>
+        public List<TriEdge> CreateAlphaShape(double Distance)
+        {
+            //this.DeleteRepeatedEdge(this.TriEdgeList);
+            Dictionary<TriEdge, List<Triangle>> TriangleDic = new Dictionary<TriEdge, List<Triangle>>();//存储边及其邻接三角形
+            List<TriEdge> LongerPeList = new List<TriEdge>();//存储较长的边界边
+            List<TriEdge> AlphaShapeEdgeList = new List<TriEdge>();
+
+            #region 为每个三角形添加EdgeList
+            for (int i = 0; i < this.TriangleList.Count; i++)
+            {
+                TriangleList[i].EdgeList.Clear();
+                TriangleList[i].EdgeList.Add(TriangleList[i].edge1);
+                TriangleList[i].EdgeList.Add(TriangleList[i].edge2);
+                TriangleList[i].EdgeList.Add(TriangleList[i].edge3);
+            }
+            #endregion
+
+            #region 找到每条边对应的邻接三角形
+            for (int i = 0; i < this.TriEdgeList.Count; i++)
+            {
+                List<Triangle> EdgeTriangle = new List<Triangle>();
+
+                if (this.TriEdgeList[i].leftTriangle != null)
+                {
+                    EdgeTriangle.Add(this.TriEdgeList[i].leftTriangle);
+                }
+                if (this.TriEdgeList[i].rightTriangle != null)
+                {
+                    EdgeTriangle.Add(this.TriEdgeList[i].rightTriangle);
+                }
+
+                TriangleDic.Add(this.TriEdgeList[i], EdgeTriangle);
+            }
+            #endregion
+
+            #region 找到长度大于给定长度的边界边
+            for (int i = 0; i < this.TriEdgeList.Count; i++)
+            {
+                if (this.TriEdgeList[i].Length > Distance && (this.TriEdgeList[i].leftTriangle==null || this.TriEdgeList[i].rightTriangle==null))
+                {
+                    LongerPeList.Add(this.TriEdgeList[i]);
+                }
+            }
+            #endregion
+
+            #region 遍历删除边
+            while (LongerPeList.Count > 0)
+            {
+                if (TriangleDic[LongerPeList[0]].Count == 1)
+                {
+                    Triangle pTriangle = TriangleDic[LongerPeList[0]][0];//找到给定边的邻接三角形T
+                    pTriangle.EdgeList.Remove(LongerPeList[0]);//找到另外两条边，并将它们的邻接三角形删除T
+
+                    TriangleDic[pTriangle.EdgeList[0]].Remove(pTriangle);
+                    TriangleDic[pTriangle.EdgeList[1]].Remove(pTriangle);
+
+                    //将两条边中大于给定距离的边加入队列
+                    if (pTriangle.EdgeList[0].Length > Distance && TriangleDic[pTriangle.EdgeList[0]].Count == 1)
+                    {
+                        if (!LongerPeList.Contains(pTriangle.EdgeList[0]))
+                        {
+                            LongerPeList.Add(pTriangle.EdgeList[0]);
+                        }
+                    }
+
+                    if (pTriangle.EdgeList[1].Length > Distance && TriangleDic[pTriangle.EdgeList[1]].Count == 1)
+                    {
+                        if (!LongerPeList.Contains(pTriangle.EdgeList[1]))
+                        {
+                            LongerPeList.Add(pTriangle.EdgeList[1]);
+                        }
+                    }
+                }
+
+                LongerPeList.RemoveAt(0);
+            }
+            #endregion
+
+            #region 找到当前列表中长度小于阈值的边界边
+            for (int i = 0; i < this.TriEdgeList.Count; i++)
+            {
+                if (this.TriEdgeList[i].Length< Distance && TriangleDic[this.TriEdgeList[i]].Count == 1)
+                {
+                    AlphaShapeEdgeList.Add(this.TriEdgeList[i]);
+                }
+            }
+            #endregion
+
+            return AlphaShapeEdgeList;
+        }
+
+        /// <summary>
+        /// 创建AlphaShape
+        /// 边不能有重复（重复会出问题）
+        /// </summary>
+        /// <param name="Distance"></param>
+        /// <returns></returns>
+        public List<TriEdge> CreateAlphaShape2(double Distance)
+        {
+            this.DeleteRepeatedEdge(this.TriEdgeList);
+            List<GraphTriangle> TriangleList = this.GetTriangleForGraph(this.TriNodeList,this.TriEdgeList);
+
+            Dictionary<TriEdge, List<GraphTriangle>> TriangleDic = new Dictionary<TriEdge, List<GraphTriangle>>();//存储边及其邻接三角形
+            List<TriEdge> LongerPeList = new List<TriEdge>();//存储较长的边界边
+            List<TriEdge> AlphaShapeEdgeList = new List<TriEdge>();
+
+            #region 找到每条边对应的邻接三角形
+            for (int i = 0; i < this.TriEdgeList.Count; i++)
+            {
+                List<GraphTriangle> EdgeTriangle = new List<GraphTriangle>();
+
+                for (int j = 0; j < TriangleList.Count; j++)
+                {
+                    if (TriangleList[j].EdgeList.Contains(this.TriEdgeList[i]))
+                    {
+                        EdgeTriangle.Add(TriangleList[j]);
+                    }
+                }
+
+                TriangleDic.Add(this.TriEdgeList[i], EdgeTriangle);
+            }
+            #endregion
+
+            #region 找到长度大于给定长度的边界边
+            for (int i = 0; i < this.TriEdgeList.Count; i++)
+            {
+                if (this.TriEdgeList[i].Length > Distance && TriangleDic[this.TriEdgeList[i]].Count == 1)
+                {
+                    LongerPeList.Add(this.TriEdgeList[i]);
+                }
+            }
+            #endregion
+
+            #region 遍历删除边
+            while (LongerPeList.Count > 0)
+            {
+                if (TriangleDic[LongerPeList[0]].Count == 1)
+                {
+                    GraphTriangle pGraphTriangle = TriangleDic[LongerPeList[0]][0];//找到给定边的邻接三角形T
+                    pGraphTriangle.EdgeList.Remove(LongerPeList[0]);//找到另外两条边，并将它们的邻接三角形删除T
+
+                    TriangleDic[pGraphTriangle.EdgeList[0]].Remove(pGraphTriangle);
+                    TriangleDic[pGraphTriangle.EdgeList[1]].Remove(pGraphTriangle);
+
+                    //将两条边中大于给定距离的边加入队列
+                    if (pGraphTriangle.EdgeList[0].Length > Distance && TriangleDic[pGraphTriangle.EdgeList[0]].Count == 1)
+                    {
+                        LongerPeList.Add(pGraphTriangle.EdgeList[0]);
+                    }
+
+                    if (pGraphTriangle.EdgeList[1].Length > Distance && TriangleDic[pGraphTriangle.EdgeList[1]].Count == 1)
+                    {
+                        LongerPeList.Add(pGraphTriangle.EdgeList[1]);
+                    }
+                }
+
+                LongerPeList.RemoveAt(0);
+            }
+            #endregion
+
+            #region 找到当前列表中长度小于阈值的边界边
+            for (int i = 0; i < this.TriEdgeList.Count; i++)
+            {
+                if (this.TriEdgeList[i].Length < Distance && TriangleDic[this.TriEdgeList[i]].Count == 1)
+                {
+                    AlphaShapeEdgeList.Add(this.TriEdgeList[i]);
+                }
+            }
+            #endregion
+
+            return AlphaShapeEdgeList;
+        }
+
+        /// <summary>
+        /// 将AlphaShape转成Polygon
+        /// </summary>
+        /// <param name="EdgeList"></param>
+        /// <returns></returns>
+        public List<PolygonObject> GetAlphaShape(List<TriEdge> EdgeList)
+        {
+            int Label = 0;
+            List<PolygonObject> PoList=new List<PolygonObject>();
+            while (EdgeList.Count > 0)
+            {
+                bool Extend = true;
+
+                List<TriNode> NodeList = new List<TriNode>();
+                TriEdge FirstEdge = EdgeList[0];
+                TriNode StartPoint = FirstEdge.startPoint;
+                TriNode EndPoint = FirstEdge.endPoint;
+                NodeList.Add(StartPoint); NodeList.Add(EndPoint);
+                while (Extend)
+                {                  
+                    for (int i = 1; i < EdgeList.Count; i++)
+                    {
+                        if (EdgeList[i].startPoint.TagValue == EndPoint.TagValue)
+                        {
+                            NodeList.Add(EdgeList[i].startPoint);
+                            EndPoint = EdgeList[i].endPoint;
+                            if (EdgeList[i].endPoint.TagValue == StartPoint.TagValue)
+                            {
+                                NodeList.Add(StartPoint);
+                                Extend = false;
+                            }
+                            EdgeList.RemoveAt(i);
+                            break;
+                        }
+
+                        if (EdgeList[i].endPoint.TagValue == EndPoint.TagValue)
+                        {
+                            NodeList.Add(EdgeList[i].endPoint);
+                            EndPoint = EdgeList[i].startPoint;
+                            if (EdgeList[i].startPoint.TagValue == StartPoint.TagValue)
+                            {
+                                NodeList.Add(StartPoint);
+                                Extend = false;
+                            }
+                            EdgeList.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+
+                PolygonObject Po = new PolygonObject(Label,NodeList);
+                PoList.Add(Po);
+                Label++;
+                EdgeList.RemoveAt(0);
+            }
+
+            return PoList;
+        }
+
+        /// <summary>
+        /// 求给定邻近图的三角形列表
+        /// </summary>
+        /// <param name="PnList"></param>
+        /// <param name="PeList"></param>
+        /// <returns></returns>
+        public List<GraphTriangle> GetTriangleForGraph(List<TriNode> PnList, List<TriEdge> PeList)
+        {
+            List<TriEdge> PfList = new List<TriEdge>();
+            for (int i = 0; i < PeList.Count; i++)
+            {
+                PfList.Add(PeList[i]);
+            }
+
+            List<GraphTriangle> GraphTriangleList = new List<GraphTriangle>();
+
+            while (PfList.Count > 0)
+            {
+                int TriangleId = 0;
+
+                TriNode Pn1 = PfList[0].startPoint;
+                TriNode Pn2 = PfList[0].endPoint;
+                for (int j = 0; j < PnList.Count; j++)
+                {
+                    #region 判断是否是三角形的第三点
+                    bool Label1 = false; bool Label2 = false;
+                    TriEdge ProxiEdge1 = null; TriEdge ProxiEdge2 = null;
+                    TriNode mPn = PnList[j];
+                    if (mPn.X != Pn1.X && mPn.X != Pn2.X)
+                    {
+                        for (int m = 0; m < PfList.Count; m++)
+                        {
+                            #region mPn与Pn1是否为边
+                            if ((mPn.TagValue == PfList[m].startPoint.TagValue && Pn1.TagValue == PfList[m].endPoint.TagValue) || mPn.TagValue == PfList[m].endPoint.TagValue && Pn1.TagValue == PfList[m].startPoint.TagValue)
+                            {
+                                Label1 = true;
+                                ProxiEdge1 = PfList[m];
+                            }
+                            #endregion
+
+                            #region mPn与Pn2是否为边
+                            if ((mPn.TagValue == PfList[m].startPoint.TagValue && Pn2.TagValue == PfList[m].endPoint.TagValue) || mPn.TagValue == PfList[m].endPoint.TagValue && Pn2.TagValue == PfList[m].startPoint.TagValue)
+                            {
+                                Label2 = true;
+                                ProxiEdge2 = PfList[m];
+                            }
+                            #endregion
+                        }
+                    }
+                    #endregion
+
+                    #region 若是第三点，添加该三角形
+                    if (Label1 && Label2)
+                    {
+                        GraphTriangle pGraphTriangle = new GraphTriangle();
+                        pGraphTriangle.ID = TriangleId;
+                        TriangleId = TriangleId + 1;
+                        pGraphTriangle.EdgeList.Add(PfList[0]);
+                        pGraphTriangle.EdgeList.Add(ProxiEdge1);
+                        pGraphTriangle.EdgeList.Add(ProxiEdge2);
+
+                        GraphTriangleList.Add(pGraphTriangle);
+                    }
+                    #endregion
+                }
+
+                PfList.RemoveAt(0);
+            }
+
+            return GraphTriangleList;
+        }
+
+        /// <summary>
+        /// 删除邻近图中的重复边（最短距离较大的边被删除）另外，目前最多只处理三条重复边的情况
+        /// </summary>
+        public void DeleteRepeatedEdge(List<TriEdge> PeList)
+        {
+            #region 将PeList添加入Dictionary中
+            Dictionary<TriEdge, bool> EdgeDic = new Dictionary<TriEdge, bool>();
+
+            for (int i = 0; i < PeList.Count; i++)
+            {
+                EdgeDic.Add(PeList[i], false);
+            }
+            #endregion
+
+            #region 将重复的边标记为删除
+            for (int i = 0; i < PeList.Count; i++)
+            {
+                TriEdge Pe1 = PeList[i];
+                if (!EdgeDic[Pe1])
+                {
+                    for (int j = 0; j < PeList.Count; j++)
+                    {
+                        if (j != i)
+                        {
+                            TriEdge Pe2 = PeList[j];
+
+                            if (!EdgeDic[Pe2])
+                            {
+                                if ((Pe1.startPoint.ID == Pe2.startPoint.ID && Pe1.endPoint.ID == Pe2.endPoint.ID) ||
+                                    (Pe1.startPoint.ID == Pe2.endPoint.ID && Pe1.endPoint.ID == Pe2.startPoint.ID))
+                                {
+                                    EdgeDic[Pe2] = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region 将删除的边在PeList中删除
+            foreach (KeyValuePair<TriEdge, bool> kvp in EdgeDic)
+            {
+                if (kvp.Value)
+                {
+                    PeList.Remove(kvp.Key);
+                }
+            }
+            #endregion
+        }
+
     }
 }

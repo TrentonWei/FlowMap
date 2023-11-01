@@ -122,5 +122,16 @@ namespace PrDispalce
             PrDispalce.CGFlowMap.CGFlowMap CGFM = new CGFlowMap.CGFlowMap(this.axMapControl1);
             CGFM.Show();
         }
+
+        /// <summary>
+        /// RasterProcessing
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void rasterProcessingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PrDispalce.FlowMap.Raster_Revision RPF = new FlowMap.Raster_Revision(this.axMapControl1);
+            RPF.Show();
+        }
     }
 }

@@ -84,8 +84,8 @@ namespace PrDispalce.FlowMap
         /// 获得线要素的点列表
         /// </summary>
         /// <param name="PL"></param>
-        /// <returns></returns>
-        public List<IPoint> GetPoints(PolylineObject PL)
+        /// <returns></returns> 节点的排列方向：流入点为第一个点
+        public List<IPoint> GetPoints(PolylineObject PL) 
         {
             List<IPoint> Points = new List<IPoint>();
             foreach (TriNode Tn in PL.PointList)
@@ -121,8 +121,8 @@ namespace PrDispalce.FlowMap
         /// 获得线段的定比分点
         /// </summary>
         /// sn:ne=rate 若n在se外，rate是负值
-        /// <param name="sPoint"></param>
-        /// <param name="ePoint"></param>
+        /// <param name="sPoint">起点</param>
+        /// <param name="ePoint">终点</param>
         /// <param name="Rate"></param>
         /// <returns></returns>nPoint
         public IPoint GetExtendPoint(IPoint sPoint, IPoint ePoint, double Rate)
